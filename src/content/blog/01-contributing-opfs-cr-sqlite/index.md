@@ -1,6 +1,6 @@
 ---
 title: "Contributing OPFS Support to CR-SQLite"
-description: "We updated CR-SQLite to support OPFS (Origin Private File System), in order to replace IndexedDB as the default storage backend. This effectively gives CR-SQLite a file-based persistence layer in the browser, making it easier to import-export SQLite databases to-from local storage and significantly improving initial sync performance with production data."
+description: "We updated CR-SQLite to support OPFS (Origin Private File System), in order to replace IndexedDB as the default storage backend. This effectively gives CR-SQLite file-based persistence layer in the browser."
 date: "Oct 09 2025"
 author: "Chris De Sousa"
 ---
