@@ -4,7 +4,7 @@ description: "An open-source, local-first inventory system for managing books. B
 date: "Oct 09 2025"
 demoURL: "https://librocco.codemyriad.io/demo"
 repoURL: "https://github.com/librocco/librocco"
-author: "Christopher De Sousa"
+author: "Chris De Sousa"
 ---
 
 Librocco is an open-source inventory management system for bookshops. It is designed to be _local-first_: resilient under poor network conditions or power outages, to ensure that stock remains accurate across multiple terminals. This resilience allows day-to-day sales and inventory tasks to continue uninterrupted, even when a terminal drops offline or the internet doesn't cooperate. It is currently used daily in an independent bookstore to manage 100k+ stock and transaction records. You can try it out with full production data at [libroc.co/demo](https://libroc.co/demo/#)

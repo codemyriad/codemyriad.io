@@ -2,7 +2,7 @@
 title: "Contributing OPFS Support to CR-SQLite"
 description: "We updated CR-SQLite to support OPFS (Origin Private File System), in order to replace IndexedDB as the default storage backend. This effectively gives CR-SQLite a file-based persistence layer in the browser, making it easier to import-export SQLite databases to-from local storage and significantly improving initial sync performance with production data."
 date: "Oct 09 2025"
-author: "Christopher De Sousa"
+author: "Chris De Sousa"
 ---
 
 We've spent the last year working with [CR-SQLite](https://github.com/vlcn-io/cr-sqlite) in [Librocco](https://github.com/librocco/librocco) - our open-source, local-first inventory system for managing books. After [running into frustration with CouchDB and PouchDB](/projects/01-librocco#1-exploring-options-for-local-storage-sync) we turned to CR-SQLite and haven’t regretted it. It’s a fantastically well-built project that runs directly in the browser, stores data locally, and syncs across nodes automatically without user intervention.

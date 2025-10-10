@@ -9,7 +9,7 @@ description:
 date: "Oct 09 2025"
 demoURL: "https://whatisedible.com/"
 repoURL: "https://github.com/whatisedible"
-author: "Christopher De Sousa"
+author: "Chris De Sousa"
 ---
 
 [What is Edible](https://whatisedible.com) is a digital menu builder that aims to change the way restaurants communicate allergen and dietary information. It’s core objective is to help its founder (who suffers from 28 allergens) find a good place for dinner.
