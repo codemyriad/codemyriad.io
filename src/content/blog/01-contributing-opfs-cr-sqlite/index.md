@@ -31,7 +31,7 @@ While the local-first ecosystem continues to evolve with new tools like [Zero](h
 - SQLite is familiar and powerful
 - CRDT-based sync resolved conflicts without complex user-facing logic
 - It can be used with _or without_ a central coordinating server, making it a true peer-to-peer option
-- It’s already working in production apps, like [ours](https://librocco.codemyriad.io/demo), which we intend to continue using & improving in the coming years.
+- It’s already working in production apps, like [ours](https://libroc.co/demo/#), which we intend to continue using & improving in the coming years.
 
 Our intent is to continue putting effort into CR-SQLite - starting with documentation. We’ve learned a lot in the process of updating it and using it in app: how WA-SQLite and CR-SQLite fit together, how VFS backends work, and where the rough edges are. We figure that contributing this knowledge back to the project is the best way to make it easier for others to adopt and build cool things with it!
 

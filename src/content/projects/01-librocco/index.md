@@ -7,7 +7,7 @@ repoURL: "https://github.com/librocco/librocco"
 author: "Christopher De Sousa"
 ---
 
-Librocco is an open-source inventory management system for bookshops. It is designed to be _local-first_: resilient under poor network conditions or power outages, to ensure that stock remains accurate across multiple terminals. This resilience allows day-to-day sales and inventory tasks to continue uninterrupted, even when a terminal drops offline or the internet doesn't cooperate. It is currently used daily in an independent bookstore to manage 100k+ stock and transaction records. You can try it out with full production data at [librocco.codemyriad.io/demo](https://librocco.codemyriad.io/demo)
+Librocco is an open-source inventory management system for bookshops. It is designed to be _local-first_: resilient under poor network conditions or power outages, to ensure that stock remains accurate across multiple terminals. This resilience allows day-to-day sales and inventory tasks to continue uninterrupted, even when a terminal drops offline or the internet doesn't cooperate. It is currently used daily in an independent bookstore to manage 100k+ stock and transaction records. You can try it out with full production data at [libroc.co/demo](https://libroc.co/demo/#)
 
 Librocco is built on [CR-SQLite](https://github.com/vlcn-io/cr-sqlite), a CRDT extension to SQLite compiled to WebAssembly. This enables it to run directly in the browser, store data locally, and resolve conflicts across nodes automatically - without requiring user intervention.
 
@@ -34,7 +34,7 @@ We researched alternatives and landed on CR-SQLite because:
 2. CRDT-based sync resolved conflicts without complex user-facing logic
 3. It can be used with _or without_ a central coordinating server, making it a true peer-to-peer option.
 
-We recently contributed to CR-SQLite, updating it to the latest WA-SQLite in order to enable [OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) as a storage layer. Since SQLite stores everything in a single file, this makes importing and exporting data from local storage far easier, and also improves our initial sync times significantly (more on this here).
+We recently [contributed to CR-SQLite](/blog/01-contributing-opfs-cr-sqlite), updating it to the latest WA-SQLite in order to enable [OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) as a storage layer. Since SQLite stores everything in a single file, this makes importing and exporting data from local storage far easier, and also improves our initial sync times significantly (more on this here).
 
 ### 2. Adopting Shape Up for project management
 
