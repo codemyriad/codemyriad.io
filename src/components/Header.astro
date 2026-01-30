@@ -7,15 +7,13 @@ import { SITE } from "@consts";
 <header>
   <Container>
     <div class="flex flex-wrap items-center gap-y-3 justify-between">
-      <Link href="/" underline={false} class="flex items-center gap-3">
-        <span
-          class="inline-flex size-7 items-center justify-center rounded-full border border-white/20 text-xs text-[#FAFAFA]"
-        >
-          CM
-        </span>
-        <span class="text-sm font-semibold tracking-wide text-[#FAFAFA]">
-          {SITE.NAME}
-        </span>
+      <Link href="/" underline={false} class="flex items-center">
+        <img
+          src="/logo.svg"
+          alt={`${SITE.NAME} logo`}
+          class="h-7 w-auto"
+          loading="eager"
+        />
       </Link>
       <nav
         class="flex flex-wrap items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
