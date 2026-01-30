@@ -2,22 +2,29 @@
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
 import { SITE } from "@consts";
+
+const isHome = Astro.url.pathname === "/";
+const navHref = (hash: string) => (isHome ? hash : `/${hash}`);
 ---
 
 <header>
   <Container>
-    <div class="flex flex-wrap gap-y-2 justify-between">
+    <div class="flex flex-wrap items-center gap-y-3 justify-between">
       <Link href="/" underline={false}>
-        <h1 class="font-semibold">
-          {SITE.NAME}
-        </h1>
+        <img
+          src="/logo.svg"
+          alt={`${SITE.NAME} logo`}
+          class="h-7 w-auto"
+          loading="eager"
+        />
       </Link>
-      <nav class="flex gap-1">
-        <!-- <Link href="/blog"> blog </Link>
-        <span>
-          {`/`}
-        </span>
-        <Link href="/projects"> projects </Link> -->
+      <nav
+        class="flex flex-wrap items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
+      >
+        <Link href={navHref("#services")} underline={false}>Services</Link>
+        <Link href={navHref("#projects")} underline={false}>Projects</Link>
+        <Link href={navHref("#blog")} underline={false}>Blog</Link>
+        <Link href={navHref("#contact")} underline={false}>Contact</Link>
       </nav>
     </div>
   </Container>
