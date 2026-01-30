@@ -6,4 +6,9 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   site: "https://test-homepage.codemyriad.io",
   integrations: [mdx(), sitemap(), tailwind()],
+  vite: {
+    ssr: {
+      noExternal: ["@fontsource/jetbrains-mono"],
+    },
+  },
 });

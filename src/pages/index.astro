@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
-import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
 // import { dateRange } from "@lib/utils";
 import {
@@ -10,6 +9,8 @@ import {
   HOME,
   //LINKS
 } from "@consts";
+
+import { ArrowRight } from "@lucide/astro";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -20,115 +21,192 @@ const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
+
+type ServiceEntry = {
+  collection: "services";
+  slug: string;
+  data: {
+    title: string;
+    description: string;
+    href?: string;
+    draft?: boolean;
+  };
+};
+
+const services = (
+  (await getCollection("services" as any)) as ServiceEntry[]
+).filter((service) => !service.data.draft);
+
+const blogTitleColors = ["#F4C45C", "#F4915C"];
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  }).format(date);
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <div class="space-y-16">
-      <section>
-        <article class="space-y-4 flex flex-col">
-          <h2 class="text-lg">
-            We’re a consultancy building systems around real business workflows
-          </h2>
-          <span>
-            We do a lot of application development, but we don’t think of
-            ourselves as “just building web apps”. An application is only one
-            part of a wider operational system - alongside data flows, internal
-            processes, external touchpoints, and the realities of how work
-            actually gets done.
-          </span>
-
-          <span>
-            Most early-stage and growing organisations rely on fragile setups:
-          </span>
-          <ul>
-            <li>spreadsheets that double as databases</li>
-            <li>tools that don’t quite fit the workflow</li>
-            <li>ad-hoc automation held together by a shoe string</li>
-          </ul>
-
-          <span>
-            We work within this environment and help teams replace brittle
-            processes with systems that are reliable, coherent, and practical to
-            operate - not only technically sound, but aligned with day-to-day
-            operations.
-          </span>
-
-          <br />
-
-          <!-- <h2 class="text-lg">We believe in local-first software</h2>
-          <span>
-            Our work is inspired by the idea that apps should work offline, sync
-            seamlessly, and respect user autonomy. We see local-first as the new
-            default - and we feel a responsibility to promote these values in
-            everything we build.
-          </span> -->
-        </article>
+    <div class="space-y-24">
+      <section id="hero" class="space-y-6">
+        <h1 class="text-3xl font-medium leading-tight text-[#FAFAFA]">
+          Operational systems for growing companies.
+        </h1>
+        <p class="text-lg text-[#7EC7FF]">
+          We build the connective tissue between tools, teams, and workflows.
+        </p>
       </section>
 
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h2 class="font-semibold text-black dark:text-white">
-            Some things we've been building
-          </h2>
-          <Link href="/projects"> See all projects </Link>
+      <section id="services" class="space-y-6">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3">
+          <div
+            class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
+          >
+            <h2 class="text-xl font-medium text-[#FAFAFA]/50">
+              Areas of expertise
+            </h2>
+          </div>
+          {
+            services.map((service) => (
+              // when ready change to <a> w/ href={service.data.href ?? "#contact"}
+              <div class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6">
+                <div class="space-y-3">
+                  <h3 class="text-xl font-medium text-[#FAFAFA]">
+                    {service.data.title}
+                  </h3>
+                  <p class="text-base text-[#FAFAFA]/60">
+                    {service.data.description}
+                  </p>
+                </div>
+                {/* <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
+                  <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      class="size-4 stroke-2"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </span>
+                </div> */}
+              </div>
+            ))
+          }
         </div>
-        <ul class="flex flex-col gap-4">
+      </section>
+
+      <section id="projects" class="space-y-6">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3">
+          <div
+            class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
+          >
+            <h2 class="text-xl font-medium text-[#FAFAFA]/50">Projects</h2>
+          </div>
           {
             projects.map((project) => (
-              <li>
-                <ArrowCard entry={project} />
-              </li>
+              <a
+                href={`/${project.collection}/${project.slug}`}
+                class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
+              >
+                <div class="space-y-3">
+                  <h3 class="text-xl font-medium text-[#FAFAFA]">
+                    {project.data.title}
+                  </h3>
+                  <p class="text-base text-[#FAFAFA]/60">
+                    {project.data.description}
+                  </p>
+                </div>
+                <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
+                  <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      class="size-4 stroke-2"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </span>
+                </div>
+              </a>
             ))
           }
-        </ul>
-
-        <br />
-
-        <span>
-          Got a project in mind?
-          <Link href="mailto:team@codemyriad.io" external> Hire us </Link>
-        </span>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">Latest posts</h5>
-          <Link href="/blog"> See all posts </Link>
         </div>
-        <ul class="flex flex-col gap-4">
-          {
-            blog.map((post) => (
-              <li>
-                <ArrowCard entry={post} />
-              </li>
-            ))
-          }
-        </ul>
       </section>
 
-      <!-- <section class="space-y-4">
-        <ul class="flex flex-wrap gap-2">
+      <section id="blog" class="space-y-6">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3">
+          <div
+            class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
+          >
+            <h2 class="text-xl font-medium text-[#FAFAFA]/50">Blog</h2>
+          </div>
           {
-            LINKS.map((LINK, ix, arr) => (
-              <li class="flex gap-x-2 text-nowrap">
-                <Link
-                  href={LINK.HREF}
-                  external
-                  aria-label={`${SITE.NAME} on ${LINK.NAME}`}
-                >
-                  {LINK.NAME}
-                </Link>
-                {ix !== arr.length - 1 ? "/" : ""}
-              </li>
+            blog.map((post, index) => (
+              <a
+                href={`/${post.collection}/${post.slug}`}
+                class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
+              >
+                <div class="space-y-3">
+                  <span class="text-sm text-[#FAFAFA]/40 inline-flex items-center gap-2 my-2">
+                    Read
+                    <ArrowRight size={14} />
+                  </span>
+                  <h3
+                    class="text-xl font-medium"
+                    style={`color: ${blogTitleColors[index % blogTitleColors.length]};`}
+                  >
+                    {post.data.title}
+                  </h3>
+                </div>
+                <div class="mt-6 text-sm text-[#FAFAFA]/50">
+                  {formatDate(post.data.date)} · {post.data.author}
+                </div>
+              </a>
             ))
           }
-        </ul>
-      </section> -->
+        </div>
+      </section>
 
-      <!-- <section class="text-xl">
-        <img src="/favicon.png" />
-      </section> -->
+      <section id="contact">
+        <div class="p-6 sm:p-10">
+          <div class="space-y-4">
+            <h2 class="text-xl font-medium text-[#FAFAFA]">
+              Let’s talk about your problems
+            </h2>
+            <p class="text-base font-regular text-[#FAFAFA]/60">
+              Want to accelerate delivery, remove technical blockers, or
+              validate whether an idea deserves investment? Book a short
+              conversation and we’ll listen to your context and give practical
+              recommendations.
+            </p>
+            <div class="flex flex-wrap items-center gap-3 text-xs font-regular">
+              <a
+                href="https://cal.com/placeholder"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex items-center justify-center bg-[#FAFAFA] px-4 py-2 text-[#0A0A0A] transition-colors duration-300 hover:bg-white/80"
+              >
+                Start a conversation
+              </a>
+              <a
+                href="mailto:team@codemyriad.io"
+                class="text-[#FAFAFA]/60 hover:text-[#FAFAFA] hover:underline"
+              >
+                or drop us an
+                <span class="text-[#F4C45C]">email</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </Container>
 </PageLayout>
