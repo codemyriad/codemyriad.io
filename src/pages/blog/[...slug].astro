@@ -5,6 +5,8 @@ import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
 import { readingTime } from "@lib/utils";
 import BackToPrev from "@components/BackToPrev.astro";
+import BlogCard from "@components/BlogCard.astro";
+import ContactSection from "@components/ContactSection.astro";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog"))
@@ -19,6 +21,12 @@ type Props = CollectionEntry<"blog">;
 
 const post = Astro.props;
 const { Content } = await post.render();
+
+const allPosts = await getCollection("blog");
+const blogMap = Object.fromEntries(allPosts.map((p) => [p.slug, p]));
+const relatedPosts = (post.data.relatedPosts ?? [])
+  .map((slug) => blogMap[slug])
+  .filter(Boolean);
 ---
 
 <PageLayout title={post.data.title} description={post.data.description}>
@@ -26,26 +34,76 @@ const { Content } = await post.render();
     <div class="animate">
       <BackToPrev href="/blog">To Blog</BackToPrev>
     </div>
-    <div class="space-y-1 my-10">
+    <div class="space-y-3 my-10">
       <div class="animate flex items-center gap-1.5">
-        <div class="font-base text-sm">
+        <div class="font-base text-sm text-[#7ec7ff]">
           <FormattedDate date={post.data.date} />
         </div>
         &bull;
-        <div class="font-base text-sm">
+        <div class="font-base text-sm text-[#7ec7ff]">
           {readingTime(post.body)}
         </div>
         &bull;
-        <div class="font-base text-sm">
+        <div class="font-base text-sm text-[#7ec7ff]">
           {post.data.author}
         </div>
       </div>
-      <div class="animate text-2xl font-semibold text-black dark:text-white">
+      <div class="animate text-4xl leading-[120%] font-semibold text-white">
         {post.data.title}
       </div>
     </div>
     <article class="animate">
       <Content />
     </article>
+    {relatedPosts.length > 0 && (
+      <div class="mt-16 space-y-6">
+        <div class="border-t border-white/10 pt-4">
+          <h2 data-typeout class="text-base font-medium text-[#FAFAFA]/40">/ Related reading</h2>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {relatedPosts.map((related) => (
+            <BlogCard
+              href={`/blog/${related.slug}`}
+              title={related.data.title}
+              date={related.data.date}
+              author={related.data.author}
+              titleColor="#FAFAFA"
+            />
+          ))}
+        </div>
+      </div>
+    )}
+    <div class="mt-16">
+      <ContactSection />
+    </div>
   </Container>
 </PageLayout>
+
+<script>
+  function initTypeout() {
+    document.querySelectorAll<HTMLElement>("[data-typeout]").forEach((el) => {
+      const text = el.textContent?.trim() ?? "";
+      el.textContent = "";
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            obs.disconnect();
+            let i = 0;
+            (function type() {
+              if (i < text.length) {
+                el.textContent += text[i++];
+                setTimeout(type, 45);
+              }
+            })();
+          }
+        },
+        { threshold: 0.5 }
+      );
+
+      obs.observe(el);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initTypeout);
+</script>
