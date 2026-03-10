@@ -1,83 +1,63 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
+import BlogCard from "@components/BlogCard.astro";
 import { BLOG } from "@consts";
-import { ArrowRight } from "@lucide/astro";
 
-const data = (await getCollection("blog"))
+const posts = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
-};
 
-const posts = data.reduce((acc: Acc, post) => {
-  const year = post.data.date.getFullYear().toString();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push(post);
-  return acc;
-}, {});
-
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
-
-const blogTitleColors = ["#F4C45C", "#F4915C"];
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  }).format(date);
 ---
 
 <PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
   <Container>
     <div class="space-y-10">
-      <h1 class="text-lg text-[#FAFAFA]">Blog</h1>
-      <div class="flex flex-col gap-4">
+      <h1 data-typeout class="text-6xl font-bold text-white">Blog</h1>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {
-          years.map((year) => (
-            <section class="space-y-4">
-              <h2 class="text-base text-[#FAFAFA]/50">{year}</h2>
-              <ul class="flex flex-col gap-4">
-                {posts[year].map((post, index) => (
-                  <li>
-                    <a
-                      href={`/blog/${post.slug}`}
-                      class="group flex flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
-                    >
-                      <div class="space-y-3">
-                        <h3
-                          class="text-base font-semibold"
-                          style={`color: ${blogTitleColors[index % blogTitleColors.length]};`}
-                        >
-                          {post.data.title}
-                        </h3>
-                        <p class="text-sm text-[#FAFAFA]/60">
-                          {post.data.description}
-                        </p>
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <span class="text-xs text-[#FAFAFA]/50">
-                          {formatDate(post.data.date)} · {post.data.author}
-                        </span>
-                        <span class="text-sm text-[#FAFAFA]/40 inline-flex items-center gap-2 my-2">
-                          Read
-                          <ArrowRight size={14} />
-                        </span>
-                      </div>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
+          posts.map((post, index) => (
+            <BlogCard
+              href={`/blog/${post.slug}`}
+              title={post.data.title}
+              date={post.data.date}
+              author={post.data.author}
+              titleColor="#FAFAFA"
+            />
           ))
         }
       </div>
     </div>
   </Container>
 </PageLayout>
+
+<script>
+  function initTypeout() {
+    document.querySelectorAll<HTMLElement>("[data-typeout]").forEach((el) => {
+      const text = el.textContent?.trim() ?? "";
+      el.textContent = "";
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            obs.disconnect();
+            let i = 0;
+            (function type() {
+              if (i < text.length) {
+                el.textContent += text[i++];
+                setTimeout(type, 45);
+              }
+            })();
+          }
+        },
+        { threshold: 0.5 }
+      );
+
+      obs.observe(el);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initTypeout);
+</script>

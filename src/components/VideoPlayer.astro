@@ -1,0 +1,90 @@
+---
+type Props = {
+  src: string;
+  type?: string;
+};
+const { src, type = "video/webm" } = Astro.props;
+---
+
+<div class="video-player relative cursor-pointer group">
+  <video class="w-full block" playsinline preload="metadata" loop>
+    <source src={src} type={type} />
+  </video>
+
+  <!-- Overlay button — always visible, icon swaps between play/pause -->
+  <div class="video-overlay absolute inset-0 flex items-center justify-center transition-opacity duration-200">
+    <div class="flex items-center justify-center w-20 h-20 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm transition-all duration-200 group-hover:bg-black/60">
+      <!-- Play icon -->
+      <svg
+        class="video-icon-play w-7 h-7 fill-white ml-1"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <polygon points="5 3 19 12 5 21 5 3" />
+      </svg>
+      <!-- Pause icon (hidden initially) -->
+      <svg
+        class="video-icon-pause w-7 h-7 fill-white hidden"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <rect x="6" y="4" width="4" height="16" />
+        <rect x="14" y="4" width="4" height="16" />
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initVideoPlayers() {
+    document.querySelectorAll<HTMLElement>(".video-player").forEach((wrapper) => {
+      if (wrapper.dataset.initialized) return;
+      wrapper.dataset.initialized = "true";
+
+      const video = wrapper.querySelector("video")!;
+      const overlay = wrapper.querySelector<HTMLElement>(".video-overlay")!;
+      const iconPlay = wrapper.querySelector<HTMLElement>(".video-icon-play")!;
+      const iconPause = wrapper.querySelector<HTMLElement>(".video-icon-pause")!;
+
+      function setPaused() {
+        iconPlay.classList.remove("hidden");
+        iconPause.classList.add("hidden");
+        overlay.style.opacity = "1";
+        overlay.style.pointerEvents = "auto";
+      }
+
+      function setPlaying() {
+        iconPlay.classList.add("hidden");
+        iconPause.classList.remove("hidden");
+        overlay.style.opacity = "0";
+        overlay.style.pointerEvents = "none";
+      }
+
+      // Initial state
+      setPaused();
+
+      wrapper.addEventListener("click", () => {
+        if (video.paused) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      });
+
+      video.addEventListener("play", setPlaying);
+      video.addEventListener("pause", setPaused);
+
+      // Show pause button on hover while playing
+      wrapper.addEventListener("mouseenter", () => {
+        if (!video.paused) overlay.style.opacity = "1";
+      });
+      wrapper.addEventListener("mouseleave", () => {
+        if (!video.paused) overlay.style.opacity = "0";
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initVideoPlayers);
+</script>
