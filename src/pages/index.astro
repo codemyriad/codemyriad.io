@@ -2,7 +2,8 @@
 import { getCollection } from "astro:content";
 import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
-import Link from "@components/Link.astro";
+import BlogCard from "@components/BlogCard.astro";
+import ContactSection from "@components/ContactSection.astro";
 // import { dateRange } from "@lib/utils";
 import {
   SITE,
@@ -10,12 +11,14 @@ import {
   //LINKS
 } from "@consts";
 
-import { ArrowRight } from "@lucide/astro";
+const HOMEPAGE_BLOG_SLUGS = [
+  "01-contributing-opfs-cr-sqlite",
+  "02-workflow-developing-third-party-deps",
+];
 
 const blog = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+  .filter((post) => !post.data.draft && HOMEPAGE_BLOG_SLUGS.includes(post.slug))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
@@ -38,20 +41,13 @@ const services = (
 ).filter((service) => !service.data.draft);
 
 const blogTitleColors = ["#F4C45C", "#F4915C"];
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  }).format(date);
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <div class="space-y-24">
-      <section id="hero" class="space-y-6">
-        <h1 class="text-3xl font-medium leading-tight text-[#FAFAFA]">
+    <div class="space-y-20">
+      <section id="hero" class="space-y-3">
+        <h1 class="text-4xl font-bold leading-tight text-[#FAFAFA]">
           Operational systems for growing companies.
         </h1>
         <p class="text-lg text-[#7EC7FF]">
@@ -69,33 +65,40 @@ const formatDate = (date: Date) =>
             </h2>
           </div>
           {
-            services.map((service) => (
-              // when ready change to <a> w/ href={service.data.href ?? "#contact"}
-              <div class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6">
-                <div class="space-y-3">
-                  <h3 class="text-xl font-medium text-[#FAFAFA]">
-                    {service.data.title}
-                  </h3>
-                  <p class="text-base text-[#FAFAFA]/60">
-                    {service.data.description}
-                  </p>
-                </div>
-                {/* <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
-                  <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="size-4 stroke-2"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  </span>
-                </div> */}
-              </div>
-            ))
+            services.map((service) => {
+              const Tag = service.data.href ? "a" : "div";
+              return (
+                <Tag
+                  href={service.data.href}
+                  class={`group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6${service.data.href ? " transition-colors duration-300 hover:bg-white/10" : ""}`}
+                >
+                  <div class="space-y-3">
+                    <h3 class="text-xl font-medium text-[#FAFAFA]">
+                      {service.data.title}
+                    </h3>
+                    <p class="text-base text-[#FAFAFA]/60">
+                      {service.data.description}
+                    </p>
+                  </div>
+                  {service.data.href && (
+                    <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
+                      <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          class="size-4 stroke-2"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </span>
+                    </div>
+                  )}
+                </Tag>
+              );
+            })
           }
         </div>
       </section>
@@ -147,78 +150,33 @@ const formatDate = (date: Date) =>
             class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
           >
             <h2 class="text-xl font-medium text-[#FAFAFA]/50">Blog</h2>
+            <a href="/blog" class="group inline-flex items-center gap-2 text-sm text-[#FAFAFA]/40 hover:text-[#FAFAFA] transition-colors duration-300">
+              View all
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                class="size-4 stroke-2 fill-none stroke-current rotate-180"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" class="translate-x-2 group-hover:translate-x-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-in-out" />
+                <polyline points="12 5 5 12 12 19" class="translate-x-1 group-hover:translate-x-0 transition-transform duration-300 ease-in-out" />
+              </svg>
+            </a>
           </div>
           {
             blog.map((post, index) => (
-              <a
+              <BlogCard
                 href={`/${post.collection}/${post.slug}`}
-                class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
-              >
-                <div class="space-y-3">
-                  <span class="text-sm text-[#FAFAFA]/40 inline-flex items-center gap-2 my-2">
-                    Read
-                    <ArrowRight size={14} />
-                  </span>
-                  <h3
-                    class="text-xl font-medium"
-                    style={`color: ${blogTitleColors[index % blogTitleColors.length]};`}
-                  >
-                    {post.data.title}
-                  </h3>
-                </div>
-                <div class="mt-6 text-sm text-[#FAFAFA]/50">
-                  {formatDate(post.data.date)} · {post.data.author}
-                </div>
-              </a>
+                title={post.data.title}
+                date={post.data.date}
+                author={post.data.author}
+                titleColor={blogTitleColors[index % blogTitleColors.length]}
+              />
             ))
           }
         </div>
       </section>
 
-      <section id="contact">
-        <div class="p-6 sm:p-10">
-          <div class="space-y-6">
-            <h2 class="text-xl font-medium text-[#FAFAFA]">
-              Feeling stuck or unsure how to proceed?
-            </h2>
-            <p class="text-base font-regular text-[#FAFAFA]/60">
-              With every project, we follow a
-              <span class="italic">fixed-time, variable-scope</span>
-              approach inspired by Basecamp’s
-              <a
-                href="https://basecamp.com/shapeup"
-                target="_blank"
-                rel="noreferrer"
-                class="text-[#F4C45C] hover:text-[#F4C45C]/80"
-              >
-                Shape Up.
-              </a> Book a short 30 minute call with us to help shape and reduce the
-              scope of your problem until a sensible next step emerges. No obligation
-              beyond that. You’ll leave with a clearer framing and a concrete next
-              step, whether or not we continue working together.
-            </p>
-            <div
-              class="flex flex-wrap items-center gap-3 font-regular text-base"
-            >
-              <a
-                href="https://cal.eu/chris-de-sousa-fxpsnh/30min-shaping-call"
-                target="_blank"
-                rel="noreferrer"
-                class="inline-flex items-center justify-center bg-[#FAFAFA] px-4 py-2 text-[#0A0A0A] transition-colors duration-300 hover:bg-white/80"
-              >
-                Start a conversation
-              </a>
-              <a
-                href="mailto:team@codemyriad.io"
-                class="text-[#FAFAFA]/60 hover:text-[#FAFAFA] hover:underline"
-              >
-                or drop us an
-                <span class="text-[#F4C45C]">email</span>.
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ContactSection />
     </div>
   </Container>
 </PageLayout>

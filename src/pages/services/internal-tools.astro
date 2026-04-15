@@ -1,0 +1,237 @@
+---
+import { getCollection } from "astro:content";
+import Container from "@components/Container.astro";
+import PageLayout from "@layouts/PageLayout.astro";
+import BlogCard from "@components/BlogCard.astro";
+import ContactSection from "@components/ContactSection.astro";
+import VideoPlayer from "@components/VideoPlayer.astro";
+
+const allBlog = (await getCollection("blog")).filter((post) => !post.data.draft);
+const blogMap = Object.fromEntries(allBlog.map((post) => [post.slug, post]));
+
+const getPost = (slug: string) => blogMap[slug];
+---
+
+<PageLayout
+  title="Internal Tools"
+  description="Custom internal tools that replace spreadsheets, workarounds, and brittle automation. Built around how work actually gets done."
+>
+  <Container>
+    <div class="space-y-20 py-8">
+
+      <!-- Page header -->
+      <section class="space-y-3">
+        <h1 data-typeout class="text-6xl font-bold leading-tight text-[#FAFAFA]">
+          Internal Tools
+        </h1>
+        <p data-typeout class="text-base text-[#7EC7FF]">Automation · Reporting · Client Portals · Dashboards</p>
+      </section>
+
+      <!-- Problem statement -->
+      <section data-fade class="grid gap-x-12 md:grid-cols-6">
+        <div class="space-y-5 md:col-span-4">
+          <h2 class="text-2xl font-medium leading-snug text-[#FAFAFA]">
+            Are the spreadsheets that built your business starting to slow you down?
+          </h2>
+          <p class="text-base leading-relaxed text-body">
+            Most growing teams are running on processes that were never really designed. A spreadsheet here, a manual export there, a workflow that only one person truly understands. It holds together, until it doesn't.
+          </p>
+          <p class="text-base leading-relaxed text-body">
+            We build the tools that replace them. Not generic software you'll have to reshape your processes around — tools built specifically for how your business already works.
+          </p>
+        </div>
+      </section>
+
+      <!-- Workflow Automation -->
+      <section data-fade class="space-y-6">
+        <h3 class="text-2xl font-medium text-[#FAFAFA]">Workflow Automation</h3>
+        <div class="grid gap-x-12 gap-y-8 items-start md:grid-cols-6">
+          <div class="space-y-5 md:col-span-4">
+            <p class="text-base leading-relaxed text-body">
+              There are tasks in your business that have to happen — weekly, monthly, every time a new client comes on board — that consume hours your team could spend on something more important. Not because they're complex, but because nobody has ever sat down and built a proper way to do them.
+            </p>
+            <p class="text-base leading-relaxed text-body">
+              The routine looks like this: pull data from here, paste it over there, cross-check it against something else, format it up, send it out. Every time, by hand. The work isn't difficult — it's just inescapable. And for a founder or director wearing multiple hats, that's exactly the problem.
+            </p>
+            <p class="text-base leading-relaxed text-body">
+              We take these processes and build them properly. A tool that picks up the data, performs the work, delivers a finished output — without someone having to sit in the middle of it every time. The hours go back to your team. The error rate goes away. And the ceiling that was quietly limiting how much you could take on lifts.
+            </p>
+          </div>
+          {
+            getPost("manual-process-cost") && (
+              <div class="md:col-span-2">
+                <BlogCard
+                  href="/blog/manual-process-cost"
+                  title={getPost("manual-process-cost")!.data.title}
+                  date={getPost("manual-process-cost")!.data.date}
+                  author={getPost("manual-process-cost")!.data.author}
+                  titleColor="#F4C45C"
+                  label="Read also"
+                />
+              </div>
+            )
+          }
+        </div>
+      </section>
+
+      <!-- Owned Tools -->
+      <section data-fade class="space-y-6">
+        <h3 class="text-2xl font-medium text-[#FAFAFA]">Owned Tools</h3>
+        <div class="grid gap-x-12 gap-y-8 items-start md:grid-cols-6">
+          <div class="space-y-5 md:col-span-4">
+            <p class="text-base leading-relaxed text-body">
+              Off-the-shelf software is built for the average business — which means it's a reasonable fit for everyone and a perfect fit for no one. You end up paying for features you don't use and working around the things it can't do.
+            </p>
+            <p class="text-base leading-relaxed text-body">
+              The alternative isn't always another SaaS subscription. Sometimes it's a tool built once, for exactly your needs, that you own completely. No monthly per-seat fees that quietly compound as you hire. No vendor changing the pricing model. No risk of a third party going out of business or keeping a feature you rely on.
+            </p>
+            <p class="text-base leading-relaxed text-body">
+              We build on open source foundations, which means whatever we build, you own — no renewal conversation, no lock-in, no licence that has to follow every new hire. Far leaner at the point where per-seat costs are adding up, or where a generic tool has never quite done the job. This is often the smarter, cheaper long-term decision. You get exactly what you need, and nothing you don't.
+            </p>
+          </div>
+          {
+            getPost("saas-subscription-worth-it") && (
+              <div class="md:col-span-2">
+                <BlogCard
+                  href="/blog/saas-subscription-worth-it"
+                  title={getPost("saas-subscription-worth-it")!.data.title}
+                  date={getPost("saas-subscription-worth-it")!.data.date}
+                  author={getPost("saas-subscription-worth-it")!.data.author}
+                  titleColor="#F4915C"
+                  label="Read also"
+                />
+              </div>
+            )
+          }
+        </div>
+      </section>
+
+      <!-- Case Studies -->
+      <section class="space-y-16">
+        <div class="border-t border-white/10 pt-4">
+        <h1 data-typeout class="text-base font-medium text-[#FAFAFA]/40">/ Case Studies</h1>
+        </div>
+
+        <!-- Case study 1: Sales Demo Tool — no blog card -->
+        <div data-fade class="space-y-6 pb-4">
+          <div class="flex flex-col items-baseline gap-1.5">
+            <h3 class="text-3xl font-medium text-[#FAFAFA]">Sales Demo Tool</h3>
+            <span class="text-base text-body/40">
+              Client / <a href="https://whatisedible.com/" target="blank" class="text-[#7EC7FF] hover:text-[#7EC7FF]/80">Edible</a>
+            </span>
+          </div>
+          <VideoPlayer src="/videos/sales-tool-demo.webm" />
+          <div class="grid gap-x-12 md:grid-cols-6">
+            <div class="space-y-5 md:col-span-4">
+              <p class="text-base leading-relaxed text-body">
+                Edible is an online allergy menu builder for restaurants and cafes. When it came to cold outreach, founder Alex noticed that sharing a working demo of a prospect's own menu was far more effective than any description of the product. Show, don't tell — their real menu, already built in the product, sent before the first conversation.
+              </p>
+              <p class="text-base leading-relaxed text-body">
+                The problem was the process behind it. Building each demo meant manually parsing menu files, reformatting the data, and constructing everything from scratch. One demo could take hours. The approach was working, but the time it required was directly capping how many prospects could be in the pipeline at once.
+              </p>
+              <p class="text-base leading-relaxed text-body">
+                Codemyriad built a workflow that does the heavy lifting. It ingests a restaurant's existing menu files (like a print menu and allergen spreadsheet), processes the data using Optical Character Recognition (OCR), and generates a demo-ready output.
+              </p>
+              <p class="text-base leading-relaxed text-body">
+                What used to take hours became a review and a send. The sales process didn't change. The ceiling on it did.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Case study 2: Property Rental Reports / Aire Spaces — with blog card -->
+        <div data-fade class="space-y-6">
+          <div class="flex flex-col items-baseline gap-1.5">
+            <h3 class="text-3xl font-medium text-[#FAFAFA]">Property Rental Reports</h3>
+            <span class="text-base text-body/40">
+              Client / <a href="https://airespaces.co.uk/" target="blank" class="text-[#7EC7FF] hover:text-[#7EC7FF]/80">Aire Spaces</a>
+            </span>
+          </div>
+          <VideoPlayer src="/videos/property-report.webm" />
+          <div class="grid gap-x-12 gap-y-8 items-start md:grid-cols-6">
+            <div class="space-y-5 md:col-span-4">
+              <p class="text-base leading-relaxed text-body">
+                Aire Spaces manages a growing portfolio of short-term rental properties. Each month, client reporting had to be produced by hand: pulling operational data, checking it, formatting it into something presentable, and getting it out to clients — for every property, every month. As the client base grew, so did the reporting workload. More clients meant more hours spent on a manual process that was also becoming harder to keep error-free.
+              </p>
+              <p class="text-base leading-relaxed text-body">
+                We built a web application that takes existing data and turns it into complete monthly client reports — automatically. No change to how data is collected. No new process to learn. Reports generate from existing data, historical views build themselves over time, and clients receive them as a web page or a downloadable PDF. The monthly manual process is gone. The time it was consuming is back.
+              </p>
+            </div>
+            {
+              getPost("report-takes-all-day") && (
+                <div class="md:col-span-2">
+                  <BlogCard
+                    href="/blog/report-takes-all-day"
+                    title={getPost("report-takes-all-day")!.data.title}
+                    date={getPost("report-takes-all-day")!.data.date}
+                    author={getPost("report-takes-all-day")!.data.author}
+                    titleColor="#9499FF"
+                    label="Read also"
+                  />
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </section>
+
+      <ContactSection />
+    </div>
+  </Container>
+</PageLayout>
+
+<script>
+  function initTypeout() {
+    document.querySelectorAll<HTMLElement>("[data-typeout]").forEach((el) => {
+      const text = el.textContent?.trim() ?? "";
+      el.textContent = "";
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            obs.disconnect();
+            let i = 0;
+            (function type() {
+              if (i < text.length) {
+                el.textContent += text[i++];
+                setTimeout(type, 45);
+              }
+            })();
+          }
+        },
+        { threshold: 0.5 }
+      );
+
+      obs.observe(el);
+    });
+  }
+
+  function initFadeUp() {
+    document.querySelectorAll<HTMLElement>("[data-fade]").forEach((el) => {
+      el.classList.add("fade-up");
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            obs.disconnect();
+            // Double rAF ensures the opacity:0 state is painted before
+            // the transition plays — fixes above-the-fold elements
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                el.classList.add("visible");
+              });
+            });
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      obs.observe(el);
+    });
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    initTypeout();
+    initFadeUp();
+  });
+</script>

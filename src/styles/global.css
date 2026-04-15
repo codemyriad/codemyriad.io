@@ -5,6 +5,7 @@
 html {
   overflow-y: scroll;
   color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 section[id] {
@@ -24,8 +25,8 @@ body {
 
 header {
   @apply fixed top-0 left-0 right-0 z-50 py-5;
-  @apply bg-[#0A0A0A]/85;
-  @apply backdrop-blur-sm saturate-200;
+  @apply bg-[#0A0A0A]/70;
+  @apply backdrop-blur-md saturate-200;
 }
 
 main {
@@ -40,17 +41,22 @@ article {
   @apply max-w-full prose prose-invert prose-img:mx-auto prose-img:my-auto;
   @apply prose-headings:font-semibold;
   @apply prose-headings:text-[#FAFAFA];
+  @apply prose-hr:border-white/10;
 }
 
 @layer utilities {
+  .text-body {
+    color: rgb(250 250 250 / 0.75);
+  }
+
   article a {
-    @apply font-sans text-current underline underline-offset-2;
-    @apply decoration-white/30;
+    @apply font-sans text-[#7ec7ff] underline underline-offset-2;
+    @apply decoration-[#7ec7ff]/50;
     @apply transition-colors duration-300 ease-in-out;
   }
   article a:hover {
-    @apply text-[#FAFAFA];
-    @apply decoration-white/50;
+    @apply text-[#7ec7ff];
+    @apply decoration-[#7ec7ff];
   }
 }
 
@@ -61,6 +67,25 @@ article {
 
 .animate.show {
   @apply opacity-100 translate-y-0;
+}
+
+@keyframes fade-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  opacity: 0;
+}
+
+.fade-up.visible {
+  animation: fade-up-in 0.3s ease-out 0.3s forwards;
 }
 
 html #back-to-top {
