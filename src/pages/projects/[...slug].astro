@@ -24,6 +24,7 @@ const { Content } = await project.render();
 
 <PageLayout title={project.data.title} description={project.data.description}>
   <Container>
+   <div class="max-w-screen-lg mx-auto">
     <div class="animate">
       <BackToPrev href="/projects">To Projects</BackToPrev>
     </div>
@@ -65,5 +66,6 @@ const { Content } = await project.render();
     <article class="animate">
       <Content />
     </article>
+   </div>
   </Container>
 </PageLayout>

@@ -1,0 +1,182 @@
+---
+type Props = {
+  beforeSrc?: string;
+  afterSrc?: string;
+  beforeAlt?: string;
+  afterAlt?: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+  /** CSS aspect-ratio for the comparison frame. Defaults to "16 / 10". */
+  aspectRatio?: string;
+  class?: string;
+};
+
+const {
+  beforeSrc,
+  afterSrc,
+  beforeAlt = "Before",
+  afterAlt = "After",
+  beforeLabel = "Before",
+  afterLabel = "After",
+  aspectRatio = "16 / 10",
+  class: className = "",
+} = Astro.props;
+---
+
+<div class={`w-full ${className}`}>
+  <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 block mb-4">
+    Before &amp; After — drag to compare
+  </span>
+
+  <div
+    data-before-after-slider
+    class="relative w-full overflow-hidden border border-white/10 select-none bg-[#0A0A0A]"
+    style={`aspect-ratio: ${aspectRatio};`}
+    role="img"
+    aria-label="Before and after comparison slider"
+  >
+    <!-- AFTER — full width base -->
+    <div class="absolute inset-0 w-full h-full">
+      <slot name="after">
+        {afterSrc && (
+          <img
+            src={afterSrc}
+            alt={afterAlt}
+            class="w-full h-full object-cover block pointer-events-none"
+            draggable="false"
+          />
+        )}
+      </slot>
+    </div>
+
+    <!-- BEFORE — clipped to left portion -->
+    <div data-before-clip class="h-full absolute top-0 left-0 overflow-hidden" style="width: 50%;">
+      <div class="h-full relative" data-before-inner style="width: 100%;">
+        <slot name="before">
+          {beforeSrc && (
+            <img
+              src={beforeSrc}
+              alt={beforeAlt}
+              class="w-full h-full object-cover block pointer-events-none"
+              draggable="false"
+            />
+          )}
+        </slot>
+      </div>
+    </div>
+
+    <!-- Divider line -->
+    <div
+      data-divider
+      class="h-full absolute top-0 pointer-events-none"
+      style="left: 50%; transform: translateX(-50%); width: 1px; background: rgba(126,199,255,0.6);"
+    ></div>
+
+    <!-- Handle -->
+    <div
+      data-handle
+      class="flex items-center justify-center cursor-grab"
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; background: #0d0d0d; border: 1.5px solid #7EC7FF; pointer-events: none; z-index: 10;"
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <polyline points="7,5 4,9 7,13" stroke="#7EC7FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        <polyline points="11,5 14,9 11,13" stroke="#7EC7FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      </svg>
+    </div>
+
+    <!-- Drag hint -->
+    <div
+      data-hint
+      class="pointer-events-none"
+      style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(13,13,13,0.85); border: 1px solid #2a2a2a; padding: 4px 12px;"
+    >
+      <span class="text-[9px] font-mono uppercase tracking-widest text-[#FAFAFA]/40">drag to compare</span>
+    </div>
+  </div>
+
+  <div class="flex justify-between mt-3">
+    <div class="flex items-center gap-2">
+      <div class="w-2 h-2 bg-red-400 opacity-70"></div>
+      <span class="text-[10px] font-mono text-[#FAFAFA]/40 uppercase tracking-widest">{beforeLabel}</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-mono text-[#FAFAFA]/40 uppercase tracking-widest">{afterLabel}</span>
+      <div class="w-2 h-2 opacity-70" style="background: #7EC7FF;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initBeforeAfterSliders() {
+    const sliders = document.querySelectorAll<HTMLElement>("[data-before-after-slider]");
+    sliders.forEach((container) => {
+      if (container.dataset.initialized === "true") return;
+      container.dataset.initialized = "true";
+
+      const clip = container.querySelector<HTMLElement>("[data-before-clip]");
+      const inner = container.querySelector<HTMLElement>("[data-before-inner]");
+      const divider = container.querySelector<HTMLElement>("[data-divider]");
+      const handle = container.querySelector<HTMLElement>("[data-handle]");
+      const hint = container.querySelector<HTMLElement>("[data-hint]");
+      if (!clip || !inner || !divider || !handle) return;
+
+      let dragging = false;
+
+      const setPos = (pct: number) => {
+        const clamped = Math.min(100, Math.max(0, pct));
+        clip.style.width = `${clamped}%`;
+        const containerWidth = container.getBoundingClientRect().width;
+        inner.style.width = `${containerWidth}px`;
+        divider.style.left = `${clamped}%`;
+        handle.style.left = `${clamped}%`;
+        if (hint && clamped !== 50) hint.style.display = "none";
+      };
+
+      const updateFrom = (clientX: number) => {
+        const rect = container.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const pct = (x / rect.width) * 100;
+        setPos(pct);
+      };
+
+      const onMouseDown = (e: MouseEvent) => {
+        e.preventDefault();
+        dragging = true;
+        handle.style.cursor = "grabbing";
+        updateFrom(e.clientX);
+      };
+      const onTouchStart = (e: TouchEvent) => {
+        dragging = true;
+        updateFrom(e.touches[0].clientX);
+      };
+      const onMouseMove = (e: MouseEvent) => {
+        if (!dragging) return;
+        updateFrom(e.clientX);
+      };
+      const onTouchMove = (e: TouchEvent) => {
+        if (!dragging) return;
+        updateFrom(e.touches[0].clientX);
+      };
+      const stop = () => {
+        dragging = false;
+        handle.style.cursor = "grab";
+      };
+
+      container.addEventListener("mousedown", onMouseDown);
+      container.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", stop);
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
+      window.addEventListener("touchend", stop);
+      window.addEventListener("resize", () => {
+        const current = parseFloat(clip.style.width) || 50;
+        setPos(current);
+      });
+
+      setPos(50);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initBeforeAfterSliders);
+  initBeforeAfterSliders();
+</script>
