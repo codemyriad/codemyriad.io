@@ -1,0 +1,19 @@
+---
+type Props = {
+  color?: "teal" | "amber";
+  class?: string;
+};
+
+const { color = "teal", class: className = "" } = Astro.props;
+
+const borderColor = color === "amber" ? "#F4915C" : "#7EC7FF";
+---
+
+<div
+  class={`pl-6 py-4 bg-white/5 border-l-2 ${className}`}
+  style={`border-left-color: ${borderColor};`}
+>
+  <p class="text-sm italic text-[#FAFAFA] leading-relaxed max-w-2xl">
+    <slot />
+  </p>
+</div>

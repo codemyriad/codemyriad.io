@@ -1,0 +1,242 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { X, ArrowUpRight, Terminal, Minus } from "@lucide/astro";
+import CaseStudyContent from "./CaseStudyContent.astro";
+
+type Props = {
+  entry: CollectionEntry<"case-studies">;
+  /** Full case-study slug (project-folder/case-study-folder). */
+  slug: string;
+  canonicalHref: string;
+};
+
+const { entry, slug, canonicalHref } = Astro.props;
+const { title, type, window: windowHints } = entry.data;
+
+// Window accent now matches the card accent (site palette).
+const accent = type === "experiment" ? "#F4915C" : "#7EC7FF";
+// Dim variant for muted statusbar/footer text.
+const accentDim = type === "experiment" ? "#5a3a22" : "#2a4a6a";
+
+const defaultWidth = windowHints?.width ?? 720;
+const defaultHeight = windowHints?.height ?? 480;
+
+const parts = slug.split("/");
+const projectSlug = parts[0];
+const studySlug = parts.slice(-1)[0];
+const filename = `${studySlug.replace(/-/g, "_")}.log`;
+const promptCmd = `cat ./${projectSlug}/${studySlug}/index.md`;
+const statusLabel = type === "experiment" ? "EXPERIMENT" : "SHIPPED";
+---
+
+<div
+  data-case-study-window
+  data-window-slug={studySlug}
+  data-window-type={type}
+  hidden
+  class="case-study-window fixed flex flex-col"
+  style={`
+    width: min(${defaultWidth}px, calc(100vw - 32px));
+    height: min(${defaultHeight}px, calc(100vh - 80px));
+    box-shadow:
+      0 0 0 2px #1a1a1a,
+      0 0 0 4px ${accent},
+      0 0 0 6px #0a0a0a,
+      0 0 0 8px #1a1a1a,
+      4px 4px 0 8px rgba(0,0,0,0.8),
+      8px 8px 0 8px rgba(0,0,0,0.4);
+  `}
+  role="dialog"
+  aria-labelledby={`window-title-${studySlug}`}
+  aria-hidden="true"
+>
+  <!-- CRT vignette -->
+  <div aria-hidden="true" class="crt-glow"></div>
+  <!-- CRT scan-lines -->
+  <div aria-hidden="true" class="crt-scanlines"></div>
+
+  <!-- Title bar -->
+  <header
+    data-window-titlebar
+    class="terminal-titlebar flex items-center justify-between gap-2 px-1.5 py-1.5 cursor-grab select-none"
+    style={`background: #0a0a0a; border-bottom: 2px solid ${accent};`}
+  >
+    <div class="flex items-center gap-2 min-w-0">
+      <Terminal size={14} color={accent} />
+      <span
+        id={`window-title-${studySlug}`}
+        class="font-mono text-xs uppercase tracking-[0.12em] truncate"
+        style={`color: ${accent};`}
+      >
+        {filename}
+      </span>
+    </div>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <a
+        href={canonicalHref}
+        data-window-popout
+        class="terminal-chrome-btn"
+        style={`border-color: ${accent};`}
+        aria-label="Open case study in its own page"
+        title="Open in own page"
+      >
+        <ArrowUpRight size={12} color={accent} />
+      </a>
+      <button
+        type="button"
+        class="terminal-chrome-btn"
+        style="border-color: #3a3a3a; cursor: not-allowed;"
+        aria-label="Minimize"
+        disabled
+      >
+        <Minus size={12} color="#3a3a3a" />
+      </button>
+      <button
+        type="button"
+        data-window-close
+        class="terminal-chrome-btn"
+        style={`border-color: ${accent};`}
+        aria-label="Close"
+      >
+        <X size={12} color={accent} />
+      </button>
+    </div>
+  </header>
+
+  <!-- Body (scrollable) -->
+  <div
+    data-window-body
+    class="terminal-body flex-1 overflow-y-auto px-5 py-4"
+  >
+    <!-- Header prompt line -->
+    <div class="terminal-prompt mb-3 text-[10px] font-mono">
+      <span class="terminal-prompt-host" style={`color: ${accent};`}>codemyriad@projects:~$ </span><span class="terminal-prompt-cmd">{promptCmd}</span>
+    </div>
+
+    <!-- Title separator -->
+    <div class="mb-4 pb-3 border-b border-white/10">
+      <span
+        class="font-mono font-bold uppercase tracking-[0.05em] text-[13px]"
+        style={`color: ${accent};`}
+      >
+        // {title}
+      </span>
+    </div>
+
+    <div class="terminal-content">
+      <CaseStudyContent entry={entry} showHeader={false} fullPage={false} />
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <footer
+    class="terminal-statusbar flex justify-between items-center px-4 py-1"
+    style={`background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.06);`}
+  >
+    <span class="font-mono text-[9px] tracking-widest" style={`color: ${accentDim};`}>
+      STATUS: READ-ONLY
+    </span>
+    <span class="font-mono text-[9px] tracking-widest" style={`color: ${accentDim};`}>
+      {statusLabel}
+    </span>
+  </footer>
+</div>
+
+<style>
+  .case-study-window {
+    transform-origin: top left;
+    background: #0A0A0A;
+  }
+
+  /* Open animation — mirrors the framer-motion spring (stiffness 320, damping 26)
+     from the reference: scale 0.88 → 1, y +20 → 0, opacity 0 → 1, gentle overshoot. */
+  .case-study-window[data-window-opening="true"] {
+    animation: window-open 320ms cubic-bezier(0.22, 1.3, 0.36, 1);
+  }
+  @keyframes window-open {
+    from {
+      opacity: 0;
+      transform: scale(0.88) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Close animation — same duration as open, with mirrored "anticipation" easing
+     so it feels symmetrically snappy (instead of slow-starting). */
+  .case-study-window[data-window-closing="true"] {
+    animation: window-close 320ms cubic-bezier(0.36, 0, 0.78, -0.3) forwards;
+    pointer-events: none;
+  }
+  @keyframes window-close {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.84) translateY(16px);
+    }
+  }
+
+  /* CRT phosphor vignette (below content) — neutral dark tint */
+  .crt-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(ellipse at 50% 40%, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
+  }
+
+  /* CRT scanlines (above content for that retro vibe) */
+  .crt-scanlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+  }
+
+  /* Layer page content above vignette, below scanlines */
+  .terminal-titlebar,
+  .terminal-body,
+  .terminal-statusbar {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Chrome buttons (titlebar) */
+  .terminal-chrome-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: #111111;
+    border: 1px solid;
+    cursor: pointer;
+  }
+  .terminal-chrome-btn:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Body palette — site colors with mono font */
+  .terminal-body {
+    background: #0A0A0A;
+    color: #FAFAFA;
+    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+    line-height: 1.65;
+  }
+
+  .terminal-prompt-cmd {
+    color: rgba(250, 250, 250, 0.85);
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+type Props = {
+  label: string;
+  heading?: string;
+  id?: string;
+  class?: string;
+};
+
+const { label, heading, id, class: className = "" } = Astro.props;
+
+// Auto-derive an id from the label if not provided
+const slug = id ?? label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+---
+
+<section
+  id={slug}
+  data-stage
+  data-stage-label={label}
+  data-stage-heading={heading ?? ""}
+  class={`grid grid-cols-1 md:grid-cols-[160px_1fr] gap-8 md:gap-12 ${className}`}
+>
+  <div>
+    <div class="md:sticky md:top-24">
+      <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 block">
+        {label}
+      </span>
+    </div>
+  </div>
+  <div class="space-y-6">
+    {heading && (
+      <h2 class="text-2xl md:text-3xl font-bold leading-tight text-[#FAFAFA]">
+        {heading}
+      </h2>
+    )}
+    <div class="prose-stage space-y-6 text-body text-sm md:text-base leading-relaxed max-w-3xl">
+      <slot />
+    </div>
+  </div>
+</section>

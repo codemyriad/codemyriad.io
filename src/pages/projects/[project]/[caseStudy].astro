@@ -1,0 +1,62 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import Container from "@components/Container.astro";
+import ContactSection from "@components/ContactSection.astro";
+import CaseStudyContent from "@components/case-study/CaseStudyContent.astro";
+import { ChevronRight } from "@lucide/astro";
+
+export async function getStaticPaths() {
+  const caseStudies = (await getCollection("case-studies"))
+    .filter((cs) => !cs.data.draft && cs.data.writeUp !== false);
+
+  return caseStudies.map((cs) => {
+    // Slug is "<project>/<case-study>"; case-study slug may further contain "/index" stripped
+    const parts = cs.slug.split("/");
+    const project = parts[0];
+    const caseStudy = parts.slice(1).join("/");
+    return {
+      params: { project, caseStudy },
+      props: { entry: cs },
+    };
+  });
+}
+
+type Props = { entry: CollectionEntry<"case-studies"> };
+
+const { entry } = Astro.props;
+const projectSlug = entry.slug.split("/")[0];
+
+// Try to look up the parent project to put its name in the breadcrumb
+const projects = await getCollection("projects");
+const parentProject = projects.find((p) => p.slug.split("/")[0] === projectSlug);
+const clientName = parentProject?.data.client ?? parentProject?.data.title ?? projectSlug;
+---
+
+<PageLayout title={`${entry.data.title} — ${clientName}`} description={entry.data.summary}>
+  <Container>
+    <div class="space-y-12 max-w-screen-xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-[11px] uppercase tracking-widest text-[#FAFAFA]/40" aria-label="Breadcrumb">
+        <a href="/projects" class="hover:text-[#FAFAFA] transition-colors">Projects</a>
+        <ChevronRight size={10} />
+        <a href={`/projects/${projectSlug}`} class="hover:text-[#FAFAFA] transition-colors">{clientName}</a>
+        <ChevronRight size={10} />
+        <span class="text-[#FAFAFA]">{entry.data.title}</span>
+      </nav>
+
+      <CaseStudyContent entry={entry} showHeader={true} fullPage={true} />
+
+      <nav class="border-t border-white/10 pt-8">
+        <a
+          href={`/projects/${projectSlug}`}
+          class="text-sm text-[#7EC7FF] hover:text-[#7EC7FF]/80 inline-flex items-center gap-2"
+        >
+          ← Back to {clientName}
+        </a>
+      </nav>
+
+      <ContactSection />
+    </div>
+  </Container>
+</PageLayout>

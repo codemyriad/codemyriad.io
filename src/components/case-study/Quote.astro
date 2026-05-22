@@ -1,0 +1,32 @@
+---
+type Props = {
+  attribution?: string;
+  accent?: "teal" | "amber";
+  size?: "default" | "large";
+  class?: string;
+};
+
+const {
+  attribution,
+  accent = "teal",
+  size = "default",
+  class: className = "",
+} = Astro.props;
+
+const borderColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
+const textSize = size === "large" ? "text-2xl md:text-4xl" : "text-xl md:text-2xl";
+---
+
+<div
+  class={`bg-white/5 border-y border-r border-white/10 border-l-2 p-10 md:p-16 ${className}`}
+  style={`border-left-color: ${borderColor};`}
+>
+  <blockquote class={`${textSize} italic leading-tight mb-6 text-[#FAFAFA]`}>
+    <slot />
+  </blockquote>
+  {attribution && (
+    <cite class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 not-italic">
+      — {attribution}
+    </cite>
+  )}
+</div>

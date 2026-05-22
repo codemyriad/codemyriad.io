@@ -1,0 +1,241 @@
+---
+// Client-side controller for case-study windows on the project page.
+// - Reads hash (#open=slug1,slug2) on load and opens those windows
+// - Click on data-case-study-card opens its window, updates hash
+// - Drag titlebar moves window; click brings to front; close hides + removes from hash
+// - On touch/coarse-pointer devices, this is a no-op: cards remain plain anchors to canonical URLs.
+---
+
+<script>
+  (() => {
+    const isFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!isFinePointer) return;
+
+    type WindowState = {
+      el: HTMLElement;
+      slug: string;
+      x: number;
+      y: number;
+      z: number;
+    };
+
+    const windows = new Map<string, WindowState>();
+    let zCounter = 100;
+
+    const initOnce = (selector: string, fn: (el: HTMLElement) => void) => {
+      document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+        if (el.dataset.wmInit === "true") return;
+        el.dataset.wmInit = "true";
+        fn(el);
+      });
+    };
+
+    const readHash = (): string[] => {
+      const hash = window.location.hash.replace(/^#/, "");
+      const params = new URLSearchParams(hash);
+      const open = params.get("open");
+      return open ? open.split(",").filter(Boolean) : [];
+    };
+
+    const writeHash = (slugs: string[]) => {
+      if (slugs.length === 0) {
+        // Clear hash without scrolling
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      } else {
+        const params = new URLSearchParams();
+        params.set("open", slugs.join(","));
+        history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${params.toString()}`);
+      }
+    };
+
+    /** A window counts as "open" for hash purposes when it's not hidden and not currently closing. */
+    const getOpenSlugs = () =>
+      Array.from(windows.keys()).filter((slug) => {
+        const w = windows.get(slug)!.el;
+        return !w.hidden && !w.hasAttribute("data-window-closing");
+      });
+
+    const bringToFront = (slug: string) => {
+      const state = windows.get(slug);
+      if (!state) return;
+      zCounter += 1;
+      state.z = zCounter;
+      state.el.style.zIndex = String(zCounter);
+    };
+
+    /** Clamp a position so the entire window stays in the viewport, with a 16px gutter. */
+    const clampPosition = (x: number, y: number, w: number, h: number) => {
+      const gutter = 16;
+      const maxX = Math.max(gutter, window.innerWidth - w - gutter);
+      const maxY = Math.max(gutter, window.innerHeight - h - gutter);
+      return {
+        x: Math.min(Math.max(gutter, x), maxX),
+        y: Math.min(Math.max(gutter, y), maxY),
+      };
+    };
+
+    const openWindow = (slug: string) => {
+      const state = windows.get(slug);
+      if (!state) return;
+      const wasHidden = state.el.hidden;
+      if (wasHidden) {
+        state.el.hidden = false;
+        state.el.setAttribute("aria-hidden", "false");
+        // After unhide, the browser knows the rendered size (min(…) CSS resolves now).
+        const w = state.el.offsetWidth;
+        const h = state.el.offsetHeight;
+        // Cascade target: inset from the left so some of the underlying page peeks through,
+        // then stagger 28px per already-open window.
+        const openCount = Array.from(windows.values()).filter((wn) => !wn.el.hidden && wn.slug !== slug).length;
+        const offset = openCount * 28;
+        const desired = { x: 240 + offset, y: 96 + offset };
+        const clamped = clampPosition(desired.x, desired.y, w, h);
+        state.x = clamped.x;
+        state.y = clamped.y;
+        state.el.style.left = `${state.x}px`;
+        state.el.style.top = `${state.y}px`;
+        // Trigger entrance animation
+        state.el.setAttribute("data-window-opening", "true");
+        const cleanup = (e: AnimationEvent) => {
+          if (e.animationName !== "window-open") return;
+          state.el.removeAttribute("data-window-opening");
+          state.el.removeEventListener("animationend", cleanup as EventListener);
+        };
+        state.el.addEventListener("animationend", cleanup as EventListener);
+      }
+      bringToFront(slug);
+      writeHash(getOpenSlugs());
+    };
+
+    const closeWindow = (slug: string) => {
+      const state = windows.get(slug);
+      if (!state || state.el.hidden) return;
+      // Don't re-trigger if a close is already in flight
+      if (state.el.hasAttribute("data-window-closing")) return;
+      // If still in the entrance animation, drop that flag so the close runs cleanly
+      state.el.removeAttribute("data-window-opening");
+      // Mark closing immediately so hash reflects intent
+      state.el.setAttribute("data-window-closing", "true");
+      writeHash(getOpenSlugs());
+
+      const cleanup = (e: AnimationEvent) => {
+        if (e.animationName !== "window-close") return;
+        state.el.removeAttribute("data-window-closing");
+        state.el.hidden = true;
+        state.el.setAttribute("aria-hidden", "true");
+        state.el.removeEventListener("animationend", cleanup as EventListener);
+      };
+      state.el.addEventListener("animationend", cleanup as EventListener);
+    };
+
+    const initWindow = (el: HTMLElement) => {
+      const slug = el.dataset.windowSlug!;
+      const state: WindowState = { el, slug, x: 0, y: 0, z: 0 };
+      windows.set(slug, state);
+
+      // Click anywhere in window brings it to front
+      el.addEventListener("mousedown", () => bringToFront(slug));
+
+      // Close button
+      const closeBtn = el.querySelector<HTMLButtonElement>("[data-window-close]");
+      closeBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeWindow(slug);
+      });
+
+      // Popout: let default link navigation happen, but stopPropagation so the window doesn't think the parent was clicked
+      const popout = el.querySelector<HTMLAnchorElement>("[data-window-popout]");
+      popout?.addEventListener("click", (e) => e.stopPropagation());
+
+      // Drag from titlebar
+      const titlebar = el.querySelector<HTMLElement>("[data-window-titlebar]");
+      if (titlebar) {
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let originX = 0;
+        let originY = 0;
+
+        titlebar.addEventListener("mousedown", (e) => {
+          // Don't initiate drag from buttons/links in the titlebar
+          if ((e.target as HTMLElement).closest("button, a")) return;
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          originX = state.x;
+          originY = state.y;
+          titlebar.style.cursor = "grabbing";
+          e.preventDefault();
+        });
+        window.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          state.x = Math.max(0, Math.min(originX + dx, window.innerWidth - el.offsetWidth));
+          state.y = Math.max(0, Math.min(originY + dy, window.innerHeight - 40));
+          el.style.left = `${state.x}px`;
+          el.style.top = `${state.y}px`;
+        });
+        window.addEventListener("mouseup", () => {
+          if (!dragging) return;
+          dragging = false;
+          titlebar.style.cursor = "grab";
+        });
+      }
+    };
+
+    const initCard = (card: HTMLElement) => {
+      const slug = card.dataset.caseStudyCard;
+      if (!slug) return;
+      card.addEventListener("click", (e) => {
+        // Don't hijack modifier-clicks or middle-clicks (users may want to open in a new tab)
+        const me = e as MouseEvent;
+        if (me.metaKey || me.ctrlKey || me.shiftKey || me.button !== 0) return;
+        if (!windows.has(slug)) return; // no window for this card — fall through to anchor
+        e.preventDefault();
+        openWindow(slug);
+      });
+    };
+
+    const init = () => {
+      initOnce("[data-case-study-window]", initWindow);
+      initOnce("[data-case-study-card]", initCard);
+
+      // Restore open windows from hash
+      const slugs = readHash();
+      slugs.forEach(openWindow);
+    };
+
+    // Run on initial page load and on Astro view transitions
+    init();
+    document.addEventListener("astro:page-load", init);
+
+    // Keep open windows in-viewport when the viewport resizes
+    window.addEventListener("resize", () => {
+      windows.forEach((state) => {
+        if (state.el.hidden) return;
+        const w = state.el.offsetWidth;
+        const h = state.el.offsetHeight;
+        const clamped = clampPosition(state.x, state.y, w, h);
+        state.x = clamped.x;
+        state.y = clamped.y;
+        state.el.style.left = `${state.x}px`;
+        state.el.style.top = `${state.y}px`;
+      });
+    });
+
+    // Handle back/forward — sync to hash
+    window.addEventListener("popstate", () => {
+      const target = new Set(readHash());
+      windows.forEach((state, slug) => {
+        const shouldBeOpen = target.has(slug);
+        if (shouldBeOpen && state.el.hidden) openWindow(slug);
+        else if (!shouldBeOpen && !state.el.hidden) {
+          state.el.hidden = true;
+          state.el.setAttribute("aria-hidden", "true");
+        }
+      });
+    });
+  })();
+</script>

@@ -3,11 +3,12 @@ import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
 import { SITE } from "@consts";
 
-const isHome = Astro.url.pathname === "/";
-const navHref = (hash: string) => (isHome ? hash : `/${hash}`);
+// Always prefix with `/` so anchors work from any page and the header can be
+// safely persisted across view-transition navigations.
+const navHref = (hash: string) => `/${hash}`;
 ---
 
-<header>
+<header transition:persist transition:name="site-nav">
   <Container>
     <div class="flex flex-wrap items-center gap-y-3 justify-between">
       <Link href="/" underline={false}>

@@ -1,0 +1,48 @@
+---
+import { Database, Layers, Cpu, Lightbulb } from "@lucide/astro";
+
+type Props = {
+  title: string;
+  items: string[];
+  icon?: "database" | "layers" | "cpu" | "lightbulb";
+  accent?: "teal" | "amber";
+  bullet?: "dash" | "dot";
+  class?: string;
+};
+
+const {
+  title,
+  items,
+  icon,
+  accent = "amber",
+  bullet = "dash",
+  class: className = "",
+} = Astro.props;
+
+const accentColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
+const Icon = icon === "database" ? Database : icon === "layers" ? Layers : icon === "cpu" ? Cpu : icon === "lightbulb" ? Lightbulb : null;
+const bulletChar = bullet === "dot" ? "•" : "—";
+---
+
+<div class={`bg-white/5 border border-white/10 p-8 max-w-2xl ${className}`}>
+  <h4
+    class="text-base font-bold mb-6 flex items-center gap-2"
+    style={`color: ${accentColor};`}
+  >
+    {Icon && <Icon size={14} />}
+    <span>{title}</span>
+  </h4>
+  <ul class="space-y-4 text-sm text-body list-none p-0">
+    {items.map((item) => (
+      <li class="flex gap-4">
+        <span
+          class="select-none shrink-0"
+          style={bullet === "dot" ? `color: ${accentColor};` : "color: rgba(250,250,250,0.4);"}
+        >
+          {bulletChar}
+        </span>
+        <span>{item}</span>
+      </li>
+    ))}
+  </ul>
+</div>

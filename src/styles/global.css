@@ -8,6 +8,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Ensure the `hidden` HTML attribute beats display utilities like `flex`. */
+[hidden] {
+  display: none !important;
+}
+
 section[id] {
   scroll-margin-top: 96px;
 }
@@ -23,7 +28,7 @@ body {
   @apply bg-[#0A0A0A] text-[#FAFAFA]/75;
 }
 
-header {
+body > header {
   @apply fixed top-0 left-0 right-0 z-50 py-5;
   @apply bg-[#0A0A0A]/70;
   @apply backdrop-blur-md saturate-200;
@@ -87,6 +92,65 @@ article {
 .fade-up.visible {
   animation: fade-up-in 0.3s ease-out 0.3s forwards;
 }
+
+/* Whole-page fade-in entrance — applied at the page-content wrapper level
+   (e.g. /projects and /projects/[project]). Runs once on initial mount. */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade-in {
+  animation: page-fade-in 320ms ease-out;
+}
+
+/* Sequential page-to-page transition (overrides Astro's default cross-fade):
+   old page fades out completely, then new page fades in.
+   Gives a "clean page" feel rather than two pages overlapping. */
+::view-transition-old(root) {
+  animation: vt-fade-out 200ms ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 320ms ease-out 200ms both;
+}
+@keyframes vt-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Keep the site nav (header) constant across page transitions — no fade.
+   The element itself is `transition:persist`ed (survives in DOM); these rules
+   also suppress the default browser cross-fade on its view-transition snapshots. */
+::view-transition-group(site-nav) {
+  animation: none !important;
+}
+::view-transition-old(site-nav) {
+  animation: none !important;
+  display: none;
+}
+::view-transition-new(site-nav) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
 
 html #back-to-top {
   @apply opacity-0 pointer-events-none;

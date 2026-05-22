@@ -1,0 +1,32 @@
+---
+type Props = {
+  metrics: { label: string; value: string }[];
+  class?: string;
+};
+
+const { metrics, class: className = "" } = Astro.props;
+
+const cols =
+  metrics.length === 1
+    ? "md:grid-cols-1"
+    : metrics.length === 2
+      ? "md:grid-cols-2"
+      : metrics.length === 4
+        ? "md:grid-cols-4"
+        : "md:grid-cols-3";
+---
+
+{metrics.length > 0 && (
+  <section class={`grid grid-cols-1 ${cols} border-y border-white/10 ${className}`}>
+    {metrics.map((metric, idx) => (
+      <div
+        class={`p-8 md:p-12 ${idx !== metrics.length - 1 ? "md:border-r border-b md:border-b-0 border-white/10" : ""}`}
+      >
+        <div class="text-4xl font-bold mb-4 text-[#FAFAFA]">{metric.value}</div>
+        <div class="text-[10px] uppercase tracking-[0.2em] text-[#FAFAFA]/40 max-w-[200px]">
+          {metric.label}
+        </div>
+      </div>
+    ))}
+  </section>
+)}

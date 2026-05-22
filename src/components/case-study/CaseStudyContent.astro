@@ -1,0 +1,115 @@
+---
+import type { CollectionEntry } from "astro:content";
+import MetricsBar from "./MetricsBar.astro";
+import OutcomeGrid from "./OutcomeGrid.astro";
+import BlogCard from "@components/BlogCard.astro";
+import { getEntries } from "astro:content";
+
+type Props = {
+  entry: CollectionEntry<"case-studies">;
+  /** When true, renders the title/summary header. Window chrome supplies its own title. */
+  showHeader?: boolean;
+  /** When true (canonical page), shows related-reading + outcomes large. */
+  fullPage?: boolean;
+};
+
+const { entry, showHeader = true, fullPage = false } = Astro.props;
+const { Content } = await entry.render();
+const {
+  title,
+  summary,
+  metrics,
+  outcomes,
+  media,
+  tags,
+  related,
+  status,
+  type,
+} = entry.data;
+
+const statusLabel = status ?? (type === "experiment" ? "Experiment" : "Shipped");
+const accent = type === "experiment" ? "#F4915C" : "#7EC7FF";
+
+// Resolve related blog references
+const relatedEntries = related && related.length > 0 ? await getEntries(related) : [];
+---
+
+<div class="case-study-content space-y-10">
+  {media && (
+    <div class="case-study-media border border-white/10 overflow-hidden">
+      {media.type === "image" ? (
+        <img
+          src={media.src}
+          alt={media.alt ?? title}
+          class="block w-full h-auto"
+          loading="lazy"
+        />
+      ) : (
+        <video
+          src={media.src}
+          poster={media.poster}
+          autoplay
+          loop
+          muted
+          playsinline
+          class="block w-full h-auto"
+        ></video>
+      )}
+    </div>
+  )}
+
+  {showHeader && (
+    <header class="space-y-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <span
+          class="px-2 py-0.5 text-[10px] uppercase tracking-widest border font-mono"
+          style={`border-color: ${accent}; color: ${accent};`}
+        >
+          {statusLabel}
+        </span>
+        {tags && tags.length > 0 && tags.map((tag) => (
+          <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+            {tag}
+          </span>
+        ))}
+      </div>
+      <h1 class={fullPage ? "text-4xl md:text-5xl font-bold text-[#FAFAFA] leading-tight" : "text-2xl md:text-3xl font-bold text-[#FAFAFA] leading-tight"}>
+        {title}
+      </h1>
+      <p class="text-lg text-body max-w-3xl leading-relaxed">{summary}</p>
+    </header>
+  )}
+
+  {metrics && metrics.length > 0 && <MetricsBar metrics={metrics} />}
+
+  <article class="case-study-body space-y-10">
+    <Content />
+  </article>
+
+  {outcomes && outcomes.length > 0 && (
+    <OutcomeGrid
+      outcomes={outcomes}
+      heading={fullPage ? "What was delivered. And what we learned." : undefined}
+    />
+  )}
+
+  {fullPage && relatedEntries.length > 0 && (
+    <section class="space-y-6 border-t border-white/10 pt-10">
+      <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 block">
+        Related reading
+      </span>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {relatedEntries.map((post: any) => (
+          <BlogCard
+            href={`/blog/${post.slug}`}
+            title={post.data.title}
+            date={post.data.date}
+            author={post.data.author}
+            titleColor="#F4C45C"
+            label="Read also"
+          />
+        ))}
+      </div>
+    </section>
+  )}
+</div>

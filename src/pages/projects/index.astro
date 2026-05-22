@@ -7,47 +7,143 @@ import { PROJECTS } from "@consts";
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Load all case studies once so we can attribute counts per project below.
+const allCaseStudies = (await getCollection("case-studies")).filter(
+  (cs) => !cs.data.draft
+);
+
+const countsForProject = (projectSlug: string) => {
+  const projectKey = projectSlug.replace(/\/index$/, "").split("/")[0];
+  const studies = allCaseStudies.filter((cs) =>
+    cs.slug.startsWith(`${projectKey}/`)
+  );
+  const experiments = studies.filter(
+    (cs) => cs.data.type === "experiment"
+  ).length;
+  const work = studies.length - experiments;
+  return { total: studies.length, work, experiments };
+};
+
+const pluralize = (n: number, singular: string, plural?: string) =>
+  `${n} ${n === 1 ? singular : plural ?? `${singular}s`}`;
+
+const formatCounts = (c: { work: number; experiments: number }) => {
+  const parts: string[] = [];
+  if (c.work > 0) parts.push(pluralize(c.work, "project"));
+  if (c.experiments > 0) parts.push(pluralize(c.experiments, "experiment"));
+  return parts.join(" · ");
+};
 ---
 
 <PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
   <Container>
-    <div class="space-y-10 max-w-screen-lg mx-auto">
-      <h1 class="text-lg text-[#FAFAFA]">Projects</h1>
-      <ul class="flex flex-col gap-4">
+    <div class="page-fade-in space-y-10 max-w-screen-xl mx-auto">
+      <header class="space-y-3">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#FAFAFA]">Projects</h1>
+        <p class="text-base text-[#FAFAFA]/60">
+          A selection of the work we've done with clients across industries.
+        </p>
+      </header>
+
+      <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 list-none p-0">
         {
-          projects.map((project) => (
-            <li>
-              <a
-                href={`/projects/${project.slug}`}
-                class="group flex min-h-[120px] flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
-              >
-                <div class="space-y-3">
-                  <h2 class="text-xl font-semibold text-[#FAFAFA]">
-                    {project.data.title}
-                  </h2>
-                  <p class="text-base text-[#FAFAFA]/60">
-                    {project.data.description}
-                  </p>
-                </div>
-                <div class="flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
-                  <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="size-4 stroke-2"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  </span>
-                </div>
-              </a>
-            </li>
-          ))
+          projects.map((project) => {
+            const tags = project.data.tags ?? [];
+            const counts = countsForProject(project.slug);
+            const countsLabel = formatCounts(counts);
+            return (
+              <li>
+                <a
+                  href={`/projects/${project.slug}`}
+                  class="project-card group relative overflow-hidden flex h-72 flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
+                >
+                  <div class="relative z-10 space-y-3">
+                    <h2 class="text-2xl font-semibold text-[#FAFAFA]">
+                      {project.data.client ?? project.data.title}
+                    </h2>
+                    {project.data.tagline && (
+                      <p class="text-sm text-[#7EC7FF]/80">
+                        {project.data.tagline}
+                      </p>
+                    )}
+                    {counts.total > 0 && (
+                      <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-[#FAFAFA]/50">
+                        <span class="relative w-2 h-2 inline-block">
+                          <span
+                            class="absolute inset-0 rounded-full animate-ping opacity-60"
+                            style="background: #7EC7FF;"
+                          />
+                          <span
+                            class="relative block w-2 h-2 rounded-full"
+                            style="background: #7EC7FF;"
+                          />
+                        </span>
+                        <span>{countsLabel}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div class="relative z-10 mt-6 flex items-end justify-between gap-4">
+                    <div class="flex flex-wrap gap-1.5">
+                      {tags.slice(0, 3).map((tag: string) => (
+                        <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/50">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <span class="inline-flex size-8 items-center justify-center border border-white/10 bg-white/5 shrink-0 text-[#FAFAFA]/60 group-hover:text-[#FAFAFA] transition-colors">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        class="size-4 stroke-2"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </span>
+                  </div>
+                </a>
+              </li>
+            );
+          })
         }
       </ul>
     </div>
   </Container>
 </PageLayout>
+
+<style>
+  /* Subtle scanline flourish — sits behind the content, intensifies on hover,
+     scrolls slowly to feel alive. */
+  .project-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 3px,
+      rgba(255, 255, 255, 0.025) 3px,
+      rgba(255, 255, 255, 0.025) 4px
+    );
+    opacity: 0.5;
+    transition: opacity 300ms ease;
+  }
+  .project-card:hover::after {
+    opacity: 1;
+    animation: card-scan 6s linear infinite;
+  }
+  @keyframes card-scan {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 4px;
+    }
+  }
+</style>
+
