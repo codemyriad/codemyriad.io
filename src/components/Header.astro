@@ -2,7 +2,7 @@
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
 import { SITE } from "@consts";
-import { ChevronRight } from "@lucide/astro";
+import { ChevronRight, Terminal } from "@lucide/astro";
 import type { BreadcrumbItem } from "@types";
 
 interface Props {
@@ -40,7 +40,7 @@ const navHref = (hash: string) => `/${hash}`;
       <img
         src="/logo.svg"
         alt={`${SITE.NAME} logo`}
-        class="h-7 w-auto"
+        class="h-6 w-auto"
         loading="eager"
       />
     </Link>
@@ -49,67 +49,140 @@ const navHref = (hash: string) => `/${hash}`;
 
 <header transition:name="site-nav">
   <Container>
-    <div class="flex flex-wrap items-center gap-y-3 justify-between">
-      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-        <!-- Invisible logo placeholder. Matches the real logo's footprint so
-             the breadcrumb sits at the right horizontal position; the visible
-             logo is the persisted sibling above. -->
-        <span class="inline-block shrink-0" aria-hidden="true">
-          <img
-            src="/logo.svg"
-            alt=""
-            class="h-7 w-auto invisible"
-            loading="eager"
-          />
-        </span>
-        {breadcrumb.length > 0 && (
-          <nav
-            class="terminal-breadcrumb flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-widest text-[#FAFAFA]/40 min-w-0"
-            aria-label="Breadcrumb"
-            data-terminal-root
-          >
-            <span aria-hidden="true" class="text-[#FAFAFA]/40 shrink-0">$</span>
-            {breadcrumb.map((item, i) => {
-              const isLast = i === breadcrumb.length - 1;
-              return (
-                <span
-                  class="flex items-center gap-2 min-w-0"
-                  data-crumb-segment
-                  data-crumb-index={i}
-                >
-                  {i > 0 && <ChevronRight size={10} class="shrink-0" />}
-                  {item.href && !isLast ? (
-                    <a
-                      href={item.href}
-                      class="hover:text-[#FAFAFA] transition-colors truncate"
-                      aria-label={item.label}
-                    >
-                      <span data-terminal-text={item.label}>{item.label}</span>
-                    </a>
-                  ) : (
-                    <span class="text-[#FAFAFA] truncate" aria-label={item.label}>
-                      <span data-terminal-text={item.label}>{item.label}</span>
-                    </span>
-                  )}
-                </span>
-              );
-            })}
-            <span
-              aria-hidden="true"
-              data-terminal-cursor
-              class="terminal-cursor"
-            ></span>
-          </nav>
-        )}
-      </div>
+    <!-- Layout: logo (col 1, always row 1) · breadcrumb (col 2/row 1 on sm+,
+         full-width row 2 on mobile) · nav/menu (col 3, always row 1). One
+         flex row with `flex-wrap`; the breadcrumb's `w-full sm:w-auto`
+         forces a wrap below on mobile only. -->
+    <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2">
+      <span class="order-1 inline-block shrink-0" aria-hidden="true">
+        <img
+          src="/logo.svg"
+          alt=""
+          class="h-6 w-auto invisible"
+          loading="eager"
+        />
+      </span>
+      <!-- Desktop nav (sm+) -->
       <nav
-        class="flex flex-wrap items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
+        class="hidden md:flex order-2 md:order-3 ml-auto items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
       >
         <Link href={navHref("#services")} underline={false}>Services</Link>
         <Link href={navHref("#projects")} underline={false}>Projects</Link>
         <Link href={navHref("#blog")} underline={false}>Blog</Link>
         <Link href={navHref("#contact")} underline={false}>Contact</Link>
       </nav>
+
+      <!-- Mobile menu toggle (below sm) + anchored dropdown. The wrapper is
+           `relative` so the dropdown can absolutely position to its
+           bottom-right edge. -->
+      <div class="relative md:hidden order-2 sm:order-3 ml-auto">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors"
+          aria-label="Toggle menu"
+          aria-controls="site-nav-menu"
+          aria-expanded="false"
+          data-menu-toggle
+        >
+          <span>[MENU]</span>
+        </button>
+
+        <!-- Dropdown panel, anchored to the button's bottom-right. -->
+        <div
+          id="site-nav-menu"
+          data-menu-panel
+          data-open="false"
+          aria-hidden="true"
+          class:list={[
+            "absolute top-full right-0 mt-2 min-w-44 z-50 p-1",
+            "bg-[#212121] border border-white/20 shadow-[0_12px_28px_rgba(0,0,0,0.45)]",
+            "backdrop-blur-md saturate-200",
+            "-translate-y-2 opacity-0 pointer-events-none",
+            "transition-[transform,opacity] duration-150 ease-out",
+            "motion-reduce:transition-opacity motion-reduce:transform-none",
+            "data-[open=true]:translate-y-0 data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto",
+          ]}
+        >
+          <nav aria-label="Site menu" class="flex flex-col">
+            {[
+              { label: "Services", href: navHref("#services") },
+              { label: "Projects", href: navHref("#projects") },
+              { label: "Blog", href: navHref("#blog") },
+              { label: "Contact", href: navHref("#contact") },
+            ].map((item) => (
+              <a
+                href={item.href}
+                data-menu-link
+                data-pressed="false"
+                class:list={[
+                  "relative block py-2 pl-4 pr-3.5",
+                  "text-[11px] uppercase tracking-[0.15em] text-[#FAFAFA]/60 no-underline",
+                  "transition-colors duration-100",
+                  "before:content-['>'] before:absolute before:left-1 before:top-1/2 before:-translate-y-1/2",
+                  "before:text-[#FAFAFA] before:opacity-0 before:transition-opacity before:duration-100",
+                  "hover:bg-white/10 hover:text-[#FAFAFA] hover:before:opacity-90",
+                  "focus-visible:bg-white/5 focus-visible:text-[#FAFAFA] focus-visible:outline-none focus-visible:before:opacity-90",
+                  "active:bg-white/[0.12] active:text-[#FAFAFA] active:before:opacity-100",
+                  "data-[pressed=true]:bg-white/[0.12] data-[pressed=true]:text-[#FAFAFA] data-[pressed=true]:before:opacity-100",
+                ]}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      <!-- Breadcrumb. order-3 + w-full on mobile forces it to wrap onto a
+           new row below the logo/menu line; sm:order-2 + sm:w-auto puts it
+           back inline between the logo and the nav from `sm` onwards (so it
+           shares the top row with the [MENU] button in the sm-md range, and
+           with the desktop nav from md upwards). -->
+      {breadcrumb.length > 0 && (
+        <nav
+          class:list={[
+            "terminal-breadcrumb",
+            "order-3 sm:order-2",
+            "w-full sm:w-auto",
+            "flex items-center gap-2 min-w-0",
+            "text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/40",
+          ]}
+          aria-label="Breadcrumb"
+          data-terminal-root
+        >
+          <span aria-hidden="true" class="text-[#FAFAFA]/40 shrink-0">$</span>
+          {breadcrumb.map((item, i) => {
+            const isLast = i === breadcrumb.length - 1;
+            return (
+              <span
+                class="flex items-center gap-2 min-w-0"
+                data-crumb-segment
+                data-crumb-index={i}
+              >
+                {i > 0 && <ChevronRight size={10} class="shrink-0" />}
+                {item.href && !isLast ? (
+                  <a
+                    href={item.href}
+                    class="hover:text-[#FAFAFA] transition-colors truncate"
+                    aria-label={item.label}
+                  >
+                    <span data-terminal-text={item.label}>{item.label}</span>
+                  </a>
+                ) : (
+                  <span class="text-[#FAFAFA] truncate" aria-label={item.label}>
+                    <span data-terminal-text={item.label}>{item.label}</span>
+                  </span>
+                )}
+              </span>
+            );
+          })}
+          <span
+            aria-hidden="true"
+            data-terminal-cursor
+            class="terminal-cursor"
+          ></span>
+        </nav>
+      )}
     </div>
   </Container>
 </header>
@@ -143,6 +216,14 @@ const navHref = (hash: string) => `/${hash}`;
     100% {
       opacity: 0;
     }
+  }
+
+  /* Hide the breadcrumb cursor while the mobile menu is open — the dropdown
+     is intentionally translucent, and the cursor blinking behind it shows
+     through as a flashing box at the top of the panel. */
+  body:has([data-menu-panel][data-open="true"]) .terminal-cursor {
+    opacity: 0 !important;
+    animation: none !important;
   }
 
   /* Locked to full opacity through the exit animation, so the clicked link
@@ -384,6 +465,46 @@ const navHref = (hash: string) => `/${hash}`;
       },
       true
     );
+
+    // Mobile menu open/close. v1 — toggle on button click, close on link
+    // click or outside click, close on Escape.
+    function setMenuOpen(open) {
+      var panel = document.querySelector("[data-menu-panel]");
+      var toggle = document.querySelector("[data-menu-toggle]");
+      if (!panel) return;
+      panel.setAttribute("data-open", open ? "true" : "false");
+      panel.setAttribute("aria-hidden", open ? "false" : "true");
+      if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    document.addEventListener("click", function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest("[data-menu-toggle]")) {
+        var panel = document.querySelector("[data-menu-panel]");
+        var isOpen = panel && panel.getAttribute("data-open") === "true";
+        setMenuOpen(!isOpen);
+        return;
+      }
+      var panel = document.querySelector("[data-menu-panel]");
+      if (!panel || panel.getAttribute("data-open") !== "true") return;
+      // Click inside the panel on a link → flash pressed state, then close
+      // (navigation will swap the DOM out shortly after).
+      var menuLink = t.closest("[data-menu-link]");
+      if (menuLink) {
+        menuLink.setAttribute("data-pressed", "true");
+        setMenuOpen(false);
+        return;
+      }
+      // Click outside the panel → close.
+      if (!t.closest("[data-menu-panel]")) setMenuOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setMenuOpen(false);
+    });
+    // Close menu after every view-transition (it shouldn't persist across nav).
+    document.addEventListener("astro:after-swap", function () {
+      setMenuOpen(false);
+    });
 
     // Type on first load and after every view-transition swap.
     document.addEventListener("astro:page-load", typeBreadcrumb);

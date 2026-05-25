@@ -29,7 +29,7 @@ body {
 }
 
 body > header {
-  @apply fixed top-0 left-0 right-0 z-50 py-5;
+  @apply fixed top-0 left-0 right-0 z-50 py-4;
 }
 
 /* Persisted blur+tint layer that sits behind the header. Lives outside the
@@ -38,7 +38,7 @@ body > header {
    wraps (e.g. when the breadcrumb pushes the nav to a second line). */
 .site-nav-backdrop {
   @apply fixed top-0 left-0 right-0 z-40 pointer-events-none;
-  height: var(--site-nav-height, 4.25rem);
+  height: var(--site-nav-height, 4.5rem);
   @apply bg-[#0A0A0A]/70;
   @apply backdrop-blur-md saturate-200;
 }
@@ -47,7 +47,7 @@ body > header {
    header's view-transition snapshot so it never re-renders or flickers
    during navigations. Positioned to align with the header's flex layout. */
 .site-nav-logo {
-  @apply fixed top-5 left-0 right-0 z-[51] pointer-events-none;
+  @apply fixed top-4 left-0 right-0 z-[51] pointer-events-none;
 }
 .site-nav-logo > * {
   /* The inner Container itself shouldn't catch clicks; only the logo link
@@ -189,7 +189,6 @@ article {
   animation: none !important;
   opacity: 1 !important;
 }
-
 
 html #back-to-top {
   @apply opacity-0 pointer-events-none;
