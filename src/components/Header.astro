@@ -64,7 +64,7 @@ const navHref = (hash: string) => `/${hash}`;
       </span>
       <!-- Desktop nav (sm+) -->
       <nav
-        class="hidden md:flex order-2 md:order-3 ml-auto items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
+        class="hidden order-2 md:order-3 ml-auto items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
       >
         <Link href={navHref("#services")} underline={false}>Services</Link>
         <Link href={navHref("#projects")} underline={false}>Projects</Link>
@@ -75,16 +75,21 @@ const navHref = (hash: string) => `/${hash}`;
       <!-- Mobile menu toggle (below sm) + anchored dropdown. The wrapper is
            `relative` so the dropdown can absolutely position to its
            bottom-right edge. -->
-      <div class="relative md:hidden order-2 sm:order-3 ml-auto">
+      <div class="relative order-2 sm:order-3 ml-auto">
         <button
           type="button"
-          class="inline-flex items-center gap-2 text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors"
-          aria-label="Toggle menu"
+          class="group inline-flex items-center gap-2 text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors"
+          aria-label="Toggle menu (M)"
+          aria-keyshortcuts="M"
           aria-controls="site-nav-menu"
           aria-expanded="false"
           data-menu-toggle
         >
-          <span>[MENU]</span>
+          <span>MENU</span>
+          <kbd
+            aria-hidden="true"
+            class="hidden sm:inline-flex items-center justify-center min-w-[1rem] h-[1rem] px-1 text-[12px] font-sans leading-none text-[#FAFAFA]/50 border border-white/15 group-hover:text-[#FAFAFA]/80 group-hover:border-white/30 transition-colors"
+          >M</kbd>
         </button>
 
         <!-- Dropdown panel, anchored to the button's bottom-right. -->
@@ -498,8 +503,50 @@ const navHref = (hash: string) => `/${hash}`;
       // Click outside the panel → close.
       if (!t.closest("[data-menu-panel]")) setMenuOpen(false);
     });
+    function focusToggle() {
+      var toggle = document.querySelector("[data-menu-toggle]");
+      if (toggle && typeof toggle.focus === "function") toggle.focus();
+    }
+    function focusFirstMenuLink() {
+      var first = document.querySelector("[data-menu-link]");
+      if (first && typeof first.focus === "function") first.focus();
+    }
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") setMenuOpen(false);
+      var panel = document.querySelector("[data-menu-panel]");
+      var isOpen = panel && panel.getAttribute("data-open") === "true";
+
+      if (e.key === "Escape") {
+        if (isOpen) {
+          setMenuOpen(false);
+          focusToggle();
+        }
+        return;
+      }
+      // `M` toggles the menu. Skipped while a modifier is held (so Cmd+M /
+      // Ctrl+M / Alt+M keep their browser/OS meaning) and while the user is
+      // typing into any editable element.
+      if (e.key === "m" || e.key === "M") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (
+          t &&
+          t.closest &&
+          t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')
+        ) {
+          return;
+        }
+        e.preventDefault();
+        setMenuOpen(!isOpen);
+        // Move focus into / out of the menu so Tab continues somewhere
+        // sensible. Wait a tick so the panel becomes focusable
+        // (pointer-events flip + transition end aren't blocking, but the
+        // attribute write must paint first).
+        if (!isOpen) {
+          requestAnimationFrame(focusFirstMenuLink);
+        } else {
+          focusToggle();
+        }
+      }
     });
     // Close menu after every view-transition (it shouldn't persist across nav).
     document.addEventListener("astro:after-swap", function () {
