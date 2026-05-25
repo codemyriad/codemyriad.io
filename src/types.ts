@@ -14,3 +14,5 @@ export type Links = {
   NAME: string;
   HREF: string;
 }[];
+
+export type BreadcrumbItem = { label: string; href?: string };

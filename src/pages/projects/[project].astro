@@ -6,7 +6,7 @@ import ContactSection from "@components/ContactSection.astro";
 import CaseStudyWindow from "@components/case-study/CaseStudyWindow.astro";
 import WindowManagerScript from "@components/case-study/WindowManagerScript.astro";
 import BlogCard from "@components/BlogCard.astro";
-import { ChevronRight, Terminal } from "@lucide/astro";
+import { Terminal } from "@lucide/astro";
 
 export async function getStaticPaths() {
   const projects = (await getCollection("projects"))
@@ -82,16 +82,13 @@ const defaultCta = (cs: CollectionEntry<"case-studies">) => {
 <PageLayout
   title={`${client} — Project`}
   description={project.data.summary ?? project.data.description}
+  breadcrumb={[
+    { label: "Projects", href: "/projects" },
+    { label: client },
+  ]}
 >
   <Container>
     <div class="page-fade-in space-y-10 max-w-screen-xl mx-auto">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm uppercase tracking-widest text-[#FAFAFA]/40" aria-label="Breadcrumb">
-        <a href="/projects" class="hover:text-[#FAFAFA] transition-colors">Projects</a>
-        <ChevronRight size={10} />
-        <span class="text-[#FAFAFA]">{client}</span>
-      </nav>
-
       <!-- Project Hero -->
       <section class="space-y-8">
         <div class="space-y-2">

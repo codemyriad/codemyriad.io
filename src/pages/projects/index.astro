@@ -36,13 +36,16 @@ const formatCounts = (c: { work: number; experiments: number }) => {
 };
 ---
 
-<PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
+<PageLayout
+  title={PROJECTS.TITLE}
+  description={PROJECTS.DESCRIPTION}
+  breadcrumb={[{ label: "Projects" }]}
+>
   <Container>
     <div class="page-fade-in space-y-10 max-w-screen-xl mx-auto">
       <header class="space-y-3">
-        <h1 class="text-4xl md:text-5xl font-bold text-[#FAFAFA]">Projects</h1>
         <p class="text-base text-[#FAFAFA]/60">
-          A selection of the work we've done with clients across industries.
+          A selection of client work and personal projects.
         </p>
       </header>
 

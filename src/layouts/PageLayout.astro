@@ -3,13 +3,15 @@ import Head from "@components/Head.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import { SITE } from "@consts";
+import type { BreadcrumbItem } from "@types";
 
 type Props = {
   title: string;
   description: string;
+  breadcrumb?: BreadcrumbItem[];
 };
 
-const { title, description } = Astro.props;
+const { title, description, breadcrumb } = Astro.props;
 ---
 
 <!doctype html>
@@ -18,7 +20,7 @@ const { title, description } = Astro.props;
     <Head title={`${title} | ${SITE.NAME}`} description={description} />
   </head>
   <body>
-    <Header />
+    <Header breadcrumb={breadcrumb} />
     <main>
       <slot />
     </main>

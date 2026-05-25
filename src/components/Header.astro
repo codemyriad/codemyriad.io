@@ -2,23 +2,106 @@
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
 import { SITE } from "@consts";
+import { ChevronRight } from "@lucide/astro";
+import type { BreadcrumbItem } from "@types";
 
-// Always prefix with `/` so anchors work from any page and the header can be
-// safely persisted across view-transition navigations.
+interface Props {
+  breadcrumb?: BreadcrumbItem[];
+}
+
+const { breadcrumb = [] } = Astro.props;
+
+// Always prefix with `/` so anchors work from any page.
 const navHref = (hash: string) => `/${hash}`;
 ---
 
-<header transition:persist transition:name="site-nav">
+<!-- Persisted backdrop layer. View-transition snapshots replace the live
+     header with a flat image briefly, which kills `backdrop-filter` (it has
+     no live content to blur). Keeping the blur layer as a persisted sibling
+     means the live blur stays active through every navigation. -->
+<div
+  class="site-nav-backdrop"
+  aria-hidden="true"
+  transition:persist="site-nav-backdrop"
+  transition:name="site-nav-backdrop"
+></div>
+
+<!-- Persisted logo, lifted out of the header's view-transition snapshot for
+     the same reason as the backdrop: it stays the same DOM element across
+     every navigation, so it can never flicker. The header keeps an invisible
+     placeholder of the same dimensions to preserve the flex layout. -->
+<div
+  class="site-nav-logo"
+  transition:persist="site-nav-logo"
+  transition:name="site-nav-logo"
+>
+  <Container>
+    <Link href="/" underline={false} class="inline-block pointer-events-auto">
+      <img
+        src="/logo.svg"
+        alt={`${SITE.NAME} logo`}
+        class="h-7 w-auto"
+        loading="eager"
+      />
+    </Link>
+  </Container>
+</div>
+
+<header transition:name="site-nav">
   <Container>
     <div class="flex flex-wrap items-center gap-y-3 justify-between">
-      <Link href="/" underline={false}>
-        <img
-          src="/logo.svg"
-          alt={`${SITE.NAME} logo`}
-          class="h-7 w-auto"
-          loading="eager"
-        />
-      </Link>
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <!-- Invisible logo placeholder. Matches the real logo's footprint so
+             the breadcrumb sits at the right horizontal position; the visible
+             logo is the persisted sibling above. -->
+        <span class="inline-block shrink-0" aria-hidden="true">
+          <img
+            src="/logo.svg"
+            alt=""
+            class="h-7 w-auto invisible"
+            loading="eager"
+          />
+        </span>
+        {breadcrumb.length > 0 && (
+          <nav
+            class="terminal-breadcrumb flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-widest text-[#FAFAFA]/40 min-w-0"
+            aria-label="Breadcrumb"
+            data-terminal-root
+          >
+            <span aria-hidden="true" class="text-[#FAFAFA]/40 shrink-0">$</span>
+            {breadcrumb.map((item, i) => {
+              const isLast = i === breadcrumb.length - 1;
+              return (
+                <span
+                  class="flex items-center gap-2 min-w-0"
+                  data-crumb-segment
+                  data-crumb-index={i}
+                >
+                  {i > 0 && <ChevronRight size={10} class="shrink-0" />}
+                  {item.href && !isLast ? (
+                    <a
+                      href={item.href}
+                      class="hover:text-[#FAFAFA] transition-colors truncate"
+                      aria-label={item.label}
+                    >
+                      <span data-terminal-text={item.label}>{item.label}</span>
+                    </a>
+                  ) : (
+                    <span class="text-[#FAFAFA] truncate" aria-label={item.label}>
+                      <span data-terminal-text={item.label}>{item.label}</span>
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+            <span
+              aria-hidden="true"
+              data-terminal-cursor
+              class="terminal-cursor"
+            ></span>
+          </nav>
+        )}
+      </div>
       <nav
         class="flex flex-wrap items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
       >
@@ -30,3 +113,338 @@ const navHref = (hash: string) => `/${hash}`;
     </div>
   </Container>
 </header>
+
+<style is:global>
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.95em;
+    background: #fafafa;
+    vertical-align: -0.1em;
+    margin-left: 1px;
+    opacity: 0;
+    flex-shrink: 0;
+  }
+  .terminal-breadcrumb[data-terminal-state="typing"] .terminal-cursor {
+    opacity: 1;
+  }
+  .terminal-breadcrumb[data-terminal-state="idle"] .terminal-cursor {
+    animation: terminal-blink 1s steps(1, end) infinite;
+  }
+  .terminal-breadcrumb[data-terminal-state="done"] .terminal-cursor {
+    opacity: 0;
+  }
+  @keyframes terminal-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Locked to full opacity through the exit animation, so the clicked link
+     (or any crumb that's about to become terminal on the next page) doesn't
+     flash from dim to bright when the swap happens. !important defeats the
+     inherited rgba color on the parent breadcrumb nav. */
+  .terminal-breadcrumb .terminal-crumb-active,
+  .terminal-breadcrumb .terminal-crumb-active:hover {
+    color: #fafafa !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-cursor {
+      display: none !important;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    // Hard cap so navigation never feels sluggish, even on long crumbs.
+    var EXIT_MAX_MS = 280;
+    var TYPE_MIN_MS = 22;
+    var TYPE_RAND_MS = 18;
+    var TYPE_GAP_BETWEEN_CRUMBS_MS = 90;
+    var DELETE_MIN_MS = 14;
+    var DELETE_GAP_BETWEEN_CRUMBS_MS = 35;
+
+    function reduceMotion() {
+      return (
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      );
+    }
+
+    function readCrumbs(scope) {
+      return Array.prototype.slice
+        .call(scope.querySelectorAll("[data-terminal-text]"))
+        .map(function (el) {
+          return el.getAttribute("data-terminal-text") || "";
+        });
+    }
+
+    // Position-wise common prefix length.
+    function commonPrefixLen(oldCrumbs, newCrumbs) {
+      var n = Math.min(oldCrumbs.length, newCrumbs.length);
+      var i = 0;
+      while (i < n && oldCrumbs[i] === newCrumbs[i]) i++;
+      return i;
+    }
+
+    function placeCursorAt(root, anchor) {
+      var cursor = root.querySelector("[data-terminal-cursor]");
+      if (!cursor) return;
+      if (anchor && anchor.parentNode) {
+        anchor.parentNode.appendChild(cursor);
+      } else {
+        root.appendChild(cursor);
+      }
+    }
+
+    function typeBreadcrumb() {
+      var root = document.querySelector("[data-terminal-root]");
+      if (!root) return;
+
+      var targets = Array.prototype.slice.call(
+        root.querySelectorAll("[data-terminal-text]")
+      );
+      if (targets.length === 0) return;
+
+      if (reduceMotion()) {
+        targets.forEach(function (t) {
+          t.textContent = t.getAttribute("data-terminal-text") || "";
+        });
+        root.setAttribute("data-terminal-state", "done");
+        return;
+      }
+
+      // Reset only targets NOT marked as pre-filled. Pre-filled crumbs were
+      // inherited from the previous page's common prefix and are already
+      // showing the correct text — leave them alone.
+      targets.forEach(function (t) {
+        if (!t.hasAttribute("data-terminal-prefilled")) {
+          t.textContent = "";
+        }
+      });
+      root.setAttribute("data-terminal-state", "typing");
+
+      var i = 0;
+      function typeNext() {
+        if (i >= targets.length) {
+          root.setAttribute("data-terminal-state", "idle");
+          if (targets.length > 0) placeCursorAt(root, targets[targets.length - 1]);
+          return;
+        }
+        var el = targets[i];
+        // Skip crumbs that were pre-filled with their final text.
+        if (el.hasAttribute("data-terminal-prefilled")) {
+          i++;
+          setTimeout(typeNext, 0);
+          return;
+        }
+        var text = el.getAttribute("data-terminal-text") || "";
+        placeCursorAt(root, el);
+        var pos = 0;
+        function typeChar() {
+          if (pos >= text.length) {
+            i++;
+            setTimeout(typeNext, TYPE_GAP_BETWEEN_CRUMBS_MS);
+            return;
+          }
+          el.textContent += text.charAt(pos++);
+          setTimeout(typeChar, TYPE_MIN_MS + Math.random() * TYPE_RAND_MS);
+        }
+        typeChar();
+      }
+      typeNext();
+    }
+
+    // Backspace from `keep` (number of crumbs to leave intact) to the end of
+    // the live breadcrumb. If `hideTrailing` is true, the segment wrapper
+    // (chevron + crumb) is hidden once its text empties, so no orphan chevron
+    // lingers before the page swap.
+    function backspaceFrom(keep, hideTrailing) {
+      return new Promise(function (resolve) {
+        var root = document.querySelector("[data-terminal-root]");
+        if (!root) return resolve();
+
+        var allTargets = Array.prototype.slice.call(
+          root.querySelectorAll("[data-terminal-text]")
+        );
+        var toClear = allTargets.slice(keep);
+        if (toClear.length === 0) return resolve();
+
+        if (reduceMotion()) {
+          toClear.forEach(function (el) {
+            el.textContent = "";
+            if (hideTrailing) {
+              var seg = el.closest("[data-crumb-segment]");
+              if (seg) seg.style.display = "none";
+            }
+          });
+          return resolve();
+        }
+
+        // Right-to-left: drain the deepest crumb first.
+        var queue = toClear.slice().reverse();
+
+        // Step time scaled so total fits in EXIT_MAX_MS.
+        var totalChars = queue.reduce(function (n, el) {
+          return n + (el.textContent || "").length;
+        }, 0);
+        var stepMs =
+          totalChars > 0
+            ? Math.max(4, Math.min(DELETE_MIN_MS, EXIT_MAX_MS / totalChars))
+            : DELETE_MIN_MS;
+
+        root.setAttribute("data-terminal-state", "typing");
+
+        var i = 0;
+        function deleteNext() {
+          if (i >= queue.length) return resolve();
+          var el = queue[i];
+          placeCursorAt(root, el);
+          function delChar() {
+            var text = el.textContent || "";
+            if (text.length === 0) {
+              if (hideTrailing) {
+                var seg = el.closest("[data-crumb-segment]");
+                if (seg) seg.style.display = "none";
+                // After hiding, move cursor to the previous still-visible
+                // text element (or the root if there is none).
+                var remaining = allTargets.slice(0, allTargets.length - 1 - i);
+                if (remaining.length > 0) {
+                  placeCursorAt(root, remaining[remaining.length - 1]);
+                } else {
+                  var cursor = root.querySelector("[data-terminal-cursor]");
+                  if (cursor) root.appendChild(cursor);
+                }
+              }
+              i++;
+              setTimeout(deleteNext, DELETE_GAP_BETWEEN_CRUMBS_MS);
+              return;
+            }
+            el.textContent = text.slice(0, -1);
+            setTimeout(delChar, stepMs);
+          }
+          delChar();
+        }
+        deleteNext();
+      });
+    }
+
+    // Keep the persisted .site-nav-backdrop sized to the live header. The
+    // backdrop lives outside the view-transition snapshot to preserve its
+    // backdrop-filter across navigations, so we sync its height in JS.
+    var heightObserver = null;
+    function syncBackdropHeight() {
+      var header = document.querySelector("body > header");
+      if (!header) return;
+      var h = header.offsetHeight;
+      if (h > 0) {
+        document.documentElement.style.setProperty(
+          "--site-nav-height",
+          h + "px"
+        );
+      }
+    }
+    function attachHeightObserver() {
+      if (heightObserver) {
+        try {
+          heightObserver.disconnect();
+        } catch (e) {}
+        heightObserver = null;
+      }
+      var header = document.querySelector("body > header");
+      if (!header) return;
+      syncBackdropHeight();
+      if (typeof ResizeObserver !== "undefined") {
+        heightObserver = new ResizeObserver(syncBackdropHeight);
+        heightObserver.observe(header);
+      }
+    }
+    attachHeightObserver();
+    document.addEventListener("astro:after-swap", attachHeightObserver);
+    window.addEventListener("resize", syncBackdropHeight);
+
+    // The moment a breadcrumb link is clicked, lock its color to full
+    // opacity so it doesn't visibly dim during the exit backspace before the
+    // new page (where it becomes the terminal crumb at full opacity) loads.
+    // Capture phase so we run before navigation logic.
+    document.addEventListener(
+      "click",
+      function (e) {
+        var target = e.target;
+        if (!target || !target.closest) return;
+        var link = target.closest("[data-crumb-segment] a");
+        if (link) link.classList.add("terminal-crumb-active");
+      },
+      true
+    );
+
+    // Type on first load and after every view-transition swap.
+    document.addEventListener("astro:page-load", typeBreadcrumb);
+
+    // Diff-aware exit: backspace only the differing tail, pre-fill the new
+    // document's crumbs with the shared prefix so the post-swap typing skips
+    // them.
+    document.addEventListener("astro:before-preparation", function (event) {
+      var originalLoader = event.loader;
+      event.loader = async function () {
+        // Snapshot the OLD crumbs from the live DOM before anything mutates.
+        var oldCrumbs = readCrumbs(document);
+
+        // Let Astro fetch & parse the next page; this populates event.newDocument.
+        await originalLoader();
+
+        var newDoc = event.newDocument;
+        var newCrumbs = newDoc ? readCrumbs(newDoc) : [];
+
+        var keep = commonPrefixLen(oldCrumbs, newCrumbs);
+
+        // Pre-fill the new document's first `keep` crumbs with their final
+        // text and mark them so the typing pass on the new page skips them.
+        // Clear the rest, so the swap never paints a frame of the full
+        // destination text before the typing script blanks them.
+        if (newDoc) {
+          var newTargets = Array.prototype.slice.call(
+            newDoc.querySelectorAll("[data-terminal-text]")
+          );
+          for (var i = 0; i < newTargets.length; i++) {
+            if (i < keep) {
+              newTargets[i].textContent = newCrumbs[i];
+              newTargets[i].setAttribute("data-terminal-prefilled", "1");
+            } else {
+              newTargets[i].textContent = "";
+            }
+          }
+        }
+
+        // If the new page has fewer crumbs than the old, the trailing segments
+        // will be gone entirely after swap — hide them as they empty so we
+        // never flash an orphan chevron.
+        var hideTrailing = newCrumbs.length < oldCrumbs.length;
+
+        // Promote the live crumb that will be the *terminal* crumb on the
+        // new page to full opacity. Covers cases where the user clicked
+        // something outside the breadcrumb (e.g. the site nav) but the
+        // breadcrumb still shifts a link from 40% to 100% on swap.
+        if (newCrumbs.length > 0 && newCrumbs.length - 1 < keep) {
+          var liveTargets = Array.prototype.slice.call(
+            document.querySelectorAll("[data-terminal-text]")
+          );
+          var becomingTerminal = liveTargets[newCrumbs.length - 1];
+          if (becomingTerminal) {
+            var anchor = becomingTerminal.closest("a");
+            if (anchor) anchor.classList.add("terminal-crumb-active");
+          }
+        }
+
+        await backspaceFrom(keep, hideTrailing);
+      };
+    });
+  })();
+</script>

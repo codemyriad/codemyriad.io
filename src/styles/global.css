@@ -30,8 +30,29 @@ body {
 
 body > header {
   @apply fixed top-0 left-0 right-0 z-50 py-5;
+}
+
+/* Persisted blur+tint layer that sits behind the header. Lives outside the
+   view-transition snapshot of the header so the backdrop-filter never goes
+   stale during navigations. Sized to the live header via JS so it tracks
+   wraps (e.g. when the breadcrumb pushes the nav to a second line). */
+.site-nav-backdrop {
+  @apply fixed top-0 left-0 right-0 z-40 pointer-events-none;
+  height: var(--site-nav-height, 4.25rem);
   @apply bg-[#0A0A0A]/70;
   @apply backdrop-blur-md saturate-200;
+}
+
+/* Persisted logo overlay. Same trick as the backdrop: lives outside the
+   header's view-transition snapshot so it never re-renders or flickers
+   during navigations. Positioned to align with the header's flex layout. */
+.site-nav-logo {
+  @apply fixed top-5 left-0 right-0 z-[51] pointer-events-none;
+}
+.site-nav-logo > * {
+  /* The inner Container itself shouldn't catch clicks; only the logo link
+     inside should, courtesy of pointer-events-auto on the <Link>. */
+  pointer-events: none;
 }
 
 main {
@@ -147,6 +168,24 @@ article {
   display: none;
 }
 ::view-transition-new(site-nav) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Same treatment for the persisted backdrop and logo overlays — they live
+   outside the header's snapshot so they can stay live across navigations,
+   but we still have to silence the root fade-in/out for their snapshots. */
+::view-transition-group(site-nav-backdrop),
+::view-transition-group(site-nav-logo) {
+  animation: none !important;
+}
+::view-transition-old(site-nav-backdrop),
+::view-transition-old(site-nav-logo) {
+  animation: none !important;
+  display: none;
+}
+::view-transition-new(site-nav-backdrop),
+::view-transition-new(site-nav-logo) {
   animation: none !important;
   opacity: 1 !important;
 }
