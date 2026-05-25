@@ -1,0 +1,30 @@
+---
+// Keyboard-shortcut indicator. Single source of truth for chip styling —
+// every place that shows a typeable shortcut renders this. The global
+// KeyboardShortcuts script picks up `data-shortcut` and clicks the nearest
+// `<a>` / `<button>` ancestor when the user types the matching keys.
+//
+// Each character is rendered as its own square keycap so 1-char shortcuts are
+// naturally square and multi-char shortcuts read as "press these keys in
+// sequence." Hidden under `sm` because typing keys without a keyboard isn't
+// useful.
+interface Props {
+  keys: string;
+  class?: string;
+}
+
+const { keys, class: className } = Astro.props;
+const chars = keys.toUpperCase().split("");
+---
+
+<kbd
+  data-shortcut={keys.toUpperCase()}
+  class:list={[
+    "hidden sm:inline-flex items-center gap-0.5 shrink-0",
+    className,
+  ]}
+>
+  {chars.map((ch) => (
+    <span class="inline-flex items-center justify-center w-3.5 h-3.5 font-sans text-[10px] leading-[12px] uppercase border border-white/15 bg-white/10 text-[#FAFAFA]/70 transition-colors">{ch}</span>
+  ))}
+</kbd>

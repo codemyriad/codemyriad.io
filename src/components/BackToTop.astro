@@ -1,12 +1,48 @@
-<button id="back-to-top" class="relative group w-fit flex pl-8 pr-3 py-1.5 flex-nowrap rounded border border-white/20 hover:opacity-50 transition-opacity duration-300 ease-in-out">
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
+<button
+  id="back-to-top"
+  data-visible="false"
+  class="group hidden sm:flex fixed bottom-4 right-[60px] z-40 items-center pl-8 pr-3 py-1.5 flex-nowrap rounded border border-white/20 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto hover:data-[visible=true]:opacity-50 transition-opacity duration-300 ease-in-out"
+  aria-label="Back to top"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    class="absolute top-1/2 left-2 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current rotate-90">
+    class="absolute top-1/2 left-2 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current rotate-90"
+  >
     <line x1="5" y1="12" x2="19" y2="12" class="translate-x-2 group-hover:translate-x-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-in-out" />
     <polyline points="12 5 5 12 12 19" class="translate-x-1 group-hover:translate-x-0 transition-transform duration-300 ease-in-out" />
   </svg>
-  <div class="text-sm">
-    Back to top
-  </div>
+  <span class="text-sm">Back to top</span>
 </button>
+
+<script>
+  // Fade in the back-to-top button only when the user has scrolled to the
+  // page footer (= effectively the bottom of the page). The button itself is
+  // fixed-positioned and inline with the keyboard-shortcut guide icon, so we
+  // observe the footer as the "at-bottom" sentinel.
+  const init = () => {
+    const btn = document.getElementById("back-to-top");
+    const sentinel = document.querySelector("footer");
+    if (!btn || !sentinel) return;
+    if (btn.dataset.btInit === "true") return;
+    btn.dataset.btInit = "true";
+    if (typeof IntersectionObserver === "undefined") {
+      btn.setAttribute("data-visible", "true");
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          btn.setAttribute(
+            "data-visible",
+            entry.isIntersecting ? "true" : "false"
+          );
+        }
+      },
+      { threshold: 0.1 }
+    );
+    obs.observe(sentinel);
+  };
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>

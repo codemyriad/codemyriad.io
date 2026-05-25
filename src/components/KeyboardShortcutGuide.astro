@@ -1,0 +1,173 @@
+---
+// Fixed bottom-left affordance that opens a modal listing every keyboard
+// shortcut wired through KbdChip and the dedicated handlers. Hidden under
+// `sm:` because typing without a keyboard isn't useful.
+import { Keyboard, X } from "@lucide/astro";
+import KbdChip from "@components/KbdChip.astro";
+
+type Item = { keys: string[]; label: string };
+
+const groups: Array<{ title: string; items: Item[] }> = [
+  {
+    title: "Navigation",
+    items: [
+      { keys: ["~"], label: "Home (or unshifted backtick)" },
+      { keys: ["M"], label: "Toggle menu" },
+      { keys: ["S"], label: "Services" },
+      { keys: ["P"], label: "Projects" },
+      { keys: ["B"], label: "Blog" },
+      { keys: ["C"], label: "Contact" },
+    ],
+  },
+  {
+    title: "Breadcrumb",
+    items: [
+      { keys: ["P"], label: "Jump to ancestor crumb (first letter)" },
+    ],
+  },
+  {
+    title: "Projects page",
+    items: [
+      {
+        keys: ["AIR"],
+        label: "Open project (first 3 letters of its name)",
+      },
+    ],
+  },
+  {
+    title: "Inside a project",
+    items: [
+      { keys: ["1", "2", "3"], label: "Open case study window" },
+      { keys: ["X"], label: "Close topmost window" },
+    ],
+  },
+];
+---
+
+<button
+  type="button"
+  data-shortcut-guide-toggle
+  class="hidden sm:inline-flex fixed bottom-4 right-4 z-40 items-center justify-center w-9 h-9 border border-white/15 bg-black/40 hover:bg-white/10 hover:border-white/30 text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors backdrop-blur-sm"
+  aria-label="Show keyboard shortcuts"
+  aria-haspopup="dialog"
+  aria-controls="shortcut-guide-dialog"
+  aria-expanded="false"
+>
+  <Keyboard size={16} />
+</button>
+
+<div
+  id="shortcut-guide-dialog"
+  data-shortcut-guide-dialog
+  data-open="false"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="shortcut-guide-title"
+  aria-hidden="true"
+  class:list={[
+    "fixed inset-0 z-50 hidden sm:flex items-center justify-center p-6",
+    "opacity-0 pointer-events-none transition-opacity duration-150",
+    "data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto",
+  ]}
+>
+  <!-- Backdrop -->
+  <div
+    data-shortcut-guide-backdrop
+    class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Panel -->
+  <div
+    class="relative w-full max-w-md bg-[#0a0a0a] border border-white/15 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
+  >
+    <header
+      class="flex items-center justify-between px-4 py-3 border-b border-white/10"
+    >
+      <h2
+        id="shortcut-guide-title"
+        class="font-mono text-xs uppercase tracking-[0.15em] text-[#FAFAFA]/80"
+      >
+        Keyboard shortcuts
+      </h2>
+      <button
+        type="button"
+        data-shortcut-guide-close
+        class="inline-flex items-center justify-center w-7 h-7 border border-white/15 hover:border-white/30 hover:bg-white/10 text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors"
+        aria-label="Close"
+      >
+        <X size={14} />
+      </button>
+    </header>
+
+    <div class="px-4 py-3 space-y-4 max-h-[70vh] overflow-y-auto">
+      {groups.map((group) => (
+        <section class="space-y-2">
+          <h3
+            class="text-[10px] uppercase tracking-[0.2em] text-[#FAFAFA]/40"
+          >
+            {group.title}
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-1.5">
+            {group.items.map((item) => (
+              <li class="flex items-center gap-3 text-xs text-[#FAFAFA]/80">
+                <span class="inline-flex items-center gap-1 shrink-0">
+                  {item.keys.map((k) => (
+                    <KbdChip keys={k} />
+                  ))}
+                </span>
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script>
+  const init = () => {
+    const toggle = document.querySelector<HTMLButtonElement>(
+      "[data-shortcut-guide-toggle]"
+    );
+    const dialog = document.querySelector<HTMLElement>(
+      "[data-shortcut-guide-dialog]"
+    );
+    if (!toggle || !dialog) return;
+    if (toggle.dataset.guideInit === "true") return;
+    toggle.dataset.guideInit = "true";
+
+    const closeBtn = dialog.querySelector<HTMLButtonElement>(
+      "[data-shortcut-guide-close]"
+    );
+    const backdrop = dialog.querySelector<HTMLElement>(
+      "[data-shortcut-guide-backdrop]"
+    );
+
+    const setOpen = (open: boolean) => {
+      dialog.setAttribute("data-open", open ? "true" : "false");
+      dialog.setAttribute("aria-hidden", open ? "false" : "true");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) closeBtn?.focus();
+      else toggle.focus();
+    };
+
+    toggle.addEventListener("click", () => {
+      const isOpen = dialog.getAttribute("data-open") === "true";
+      setOpen(!isOpen);
+    });
+    closeBtn?.addEventListener("click", () => setOpen(false));
+    backdrop?.addEventListener("click", () => setOpen(false));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (dialog.getAttribute("data-open") !== "true") return;
+      e.preventDefault();
+      setOpen(false);
+    });
+  };
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>

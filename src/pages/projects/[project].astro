@@ -6,6 +6,7 @@ import ContactSection from "@components/ContactSection.astro";
 import CaseStudyWindow from "@components/case-study/CaseStudyWindow.astro";
 import WindowManagerScript from "@components/case-study/WindowManagerScript.astro";
 import BlogCard from "@components/BlogCard.astro";
+import KbdChip from "@components/KbdChip.astro";
 import { Terminal } from "@lucide/astro";
 
 export async function getStaticPaths() {
@@ -77,6 +78,16 @@ const defaultCta = (cs: CollectionEntry<"case-studies">) => {
   if (cs.data.type === "experiment") return "Read experiment notes";
   return "Read case study";
 };
+
+// Number-key shortcuts for case studies. Skip non-clickable ones (nothing to
+// open). Pad to 2 digits once the count crosses 10, so `1` doesn't ambiguously
+// prefix `10`.
+const clickableStudies = sortedStudies.filter((cs) => cs.data.writeUp !== false);
+const studyShortcutPad = clickableStudies.length >= 10 ? 2 : 1;
+const studyShortcuts = new Map<string, string>();
+clickableStudies.forEach((cs, idx) => {
+  studyShortcuts.set(cs.slug, String(idx + 1).padStart(studyShortcutPad, "0"));
+});
 ---
 
 <PageLayout
@@ -155,9 +166,15 @@ const defaultCta = (cs: CollectionEntry<"case-studies">) => {
                     <a
                       href={canonical}
                       data-case-study-card={slug}
-                      class="flex flex-col md:flex-row items-start w-full px-12 py-8 gap-6 no-underline text-inherit"
+                      class="relative flex flex-col md:flex-row items-start w-full px-12 py-8 gap-6 no-underline text-inherit"
                       aria-label={`${cs.data.title} — ${defaultCta(cs).replace(/\s*→\s*$/, "")}`}
                     >
+                      {studyShortcuts.has(cs.slug) && (
+                        <KbdChip
+                          keys={studyShortcuts.get(cs.slug)!}
+                          class="absolute top-3 right-3 z-20"
+                        />
+                      )}
                       <!-- Title + description -->
                       <div class="flex-grow space-y-3 min-w-0">
                         <div class="flex flex-wrap items-center gap-3">

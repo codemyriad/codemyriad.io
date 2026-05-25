@@ -1,6 +1,7 @@
 ---
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
+import KbdChip from "@components/KbdChip.astro";
 import { SITE } from "@consts";
 import { ChevronRight, Terminal } from "@lucide/astro";
 import type { BreadcrumbItem } from "@types";
@@ -13,6 +14,28 @@ const { breadcrumb = [] } = Astro.props;
 
 // Always prefix with `/` so anchors work from any page.
 const navHref = (hash: string) => `/${hash}`;
+
+// First letter of each non-terminal crumb becomes a keyboard shortcut. `M` is
+// reserved for the menu toggle; dedup within the breadcrumb by stepping into
+// the label until a unique letter is found.
+const RESERVED_KEYS = new Set(["M"]);
+const breadcrumbShortcuts = new Map<number, string>();
+{
+  const used = new Set<string>();
+  breadcrumb.forEach((item, i) => {
+    if (!item.href || i === breadcrumb.length - 1) return;
+    const letters = (item.label ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    let offset = 0;
+    let key = letters.charAt(offset);
+    while (key && (used.has(key) || RESERVED_KEYS.has(key))) {
+      key = letters.charAt(++offset);
+    }
+    if (key) {
+      breadcrumbShortcuts.set(i, key);
+      used.add(key);
+    }
+  });
+}
 ---
 
 <!-- Persisted backdrop layer. View-transition snapshots replace the live
@@ -36,7 +59,11 @@ const navHref = (hash: string) => `/${hash}`;
      the same dimensions to preserve the flex layout. -->
 <div class="site-nav-logo" transition:name="site-nav-logo">
   <Container>
-    <Link href="/" underline={false} class="inline-block pointer-events-auto">
+    <Link
+      href="/"
+      underline={false}
+      class="inline-block pointer-events-auto"
+    >
       <img
         src="/logo.svg"
         alt={`${SITE.NAME} logo`}
@@ -90,10 +117,7 @@ const navHref = (hash: string) => `/${hash}`;
           data-menu-toggle
         >
           <span>MENU</span>
-          <kbd
-            aria-hidden="true"
-            class="hidden sm:inline-flex items-center justify-center min-w-[1rem] h-[1rem] px-1 text-[12px] font-sans leading-none text-[#FAFAFA]/50 border border-white/15 group-hover:text-[#FAFAFA]/80 group-hover:border-white/30 transition-colors"
-          >M</kbd>
+          <KbdChip keys="M" />
         </button>
 
         <!-- Dropdown panel, anchored to the button's bottom-right. -->
@@ -114,20 +138,21 @@ const navHref = (hash: string) => `/${hash}`;
         >
           <nav aria-label="Site menu" class="flex flex-col">
             {[
-              { label: "Services", href: "/services" },
-              { label: "Projects", href: "/projects" },
-              { label: "Blog", href: "/blog" },
-              { label: "Contact", href: navHref("#contact") },
+              { label: "Services", href: "/services", key: "S" },
+              { label: "Projects", href: "/projects", key: "P" },
+              { label: "Blog", href: "/blog", key: "B" },
+              { label: "Contact", href: navHref("#contact"), key: "C" },
             ].map((item) => (
               <a
                 href={item.href}
                 data-menu-link
                 data-pressed="false"
+                aria-keyshortcuts={item.key}
                 class:list={[
-                  "relative block py-2 pl-4 pr-3.5",
+                  "relative flex items-center justify-between gap-3 py-2 pl-5 pr-2",
                   "text-[11px] uppercase tracking-[0.15em] text-[#FAFAFA]/60 no-underline",
                   "transition-colors duration-100",
-                  "before:content-['>'] before:absolute before:left-1 before:top-1/2 before:-translate-y-1/2",
+                  "before:content-['>'] before:absolute before:left-2 before:top-1/2 before:-translate-y-1/2",
                   "before:text-[#FAFAFA] before:opacity-0 before:transition-opacity before:duration-100",
                   "hover:bg-white/10 hover:text-[#FAFAFA] hover:before:opacity-90",
                   "focus-visible:bg-white/5 focus-visible:text-[#FAFAFA] focus-visible:outline-none focus-visible:before:opacity-90",
@@ -135,7 +160,8 @@ const navHref = (hash: string) => `/${hash}`;
                   "data-[pressed=true]:bg-white/[0.12] data-[pressed=true]:text-[#FAFAFA] data-[pressed=true]:before:opacity-100",
                 ]}
               >
-                {item.label}
+                <span>{item.label}</span>
+                <KbdChip keys={item.key} />
               </a>
             ))}
           </nav>
@@ -147,20 +173,26 @@ const navHref = (hash: string) => `/${hash}`;
            back inline between the logo and the nav from `sm` onwards (so it
            shares the top row with the [MENU] button in the sm-md range, and
            with the desktop nav from md upwards). -->
-      {breadcrumb.length > 0 && (
-        <nav
-          class:list={[
-            "terminal-breadcrumb",
-            "order-3 sm:order-2",
-            "w-full sm:w-auto",
-            "flex items-center gap-2 min-w-0",
-            "text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/40",
-          ]}
-          aria-label="Breadcrumb"
-          data-terminal-root
-        >
-          <span aria-hidden="true" class="text-[#FAFAFA]/40 shrink-0">$</span>
-          {breadcrumb.map((item, i) => {
+      <nav
+        class:list={[
+          "terminal-breadcrumb",
+          "order-3 sm:order-2",
+          "w-full sm:w-auto",
+          "flex items-center gap-2 min-w-0",
+          "text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/40",
+        ]}
+        aria-label="Breadcrumb"
+        data-terminal-root
+        data-terminal-state="idle"
+      >
+        <a
+          href="/"
+          class="text-[#FAFAFA]/40 hover:text-[#FAFAFA] transition-colors shrink-0"
+          data-shortcut="~"
+          aria-label="Home"
+          aria-keyshortcuts="~"
+        >~</a>
+        {breadcrumb.map((item, i) => {
             const isLast = i === breadcrumb.length - 1;
             return (
               <span
@@ -172,10 +204,13 @@ const navHref = (hash: string) => `/${hash}`;
                 {item.href && !isLast ? (
                   <a
                     href={item.href}
-                    class="hover:text-[#FAFAFA] transition-colors truncate"
+                    class="hover:text-[#FAFAFA] transition-colors truncate inline-flex items-center gap-1.5"
                     aria-label={item.label}
                   >
                     <span data-terminal-text={item.label}>{item.label}</span>
+                    {breadcrumbShortcuts.has(i) && (
+                      <KbdChip keys={breadcrumbShortcuts.get(i)!} />
+                    )}
                   </a>
                 ) : (
                   <span class="text-[#FAFAFA] truncate" aria-label={item.label}>
@@ -185,13 +220,12 @@ const navHref = (hash: string) => `/${hash}`;
               </span>
             );
           })}
-          <span
-            aria-hidden="true"
-            data-terminal-cursor
-            class="terminal-cursor"
-          ></span>
-        </nav>
-      )}
+        <span
+          aria-hidden="true"
+          data-terminal-cursor
+          class="terminal-cursor"
+        ></span>
+      </nav>
     </div>
   </Container>
 </header>
@@ -242,6 +276,39 @@ const navHref = (hash: string) => `/${hash}`;
   .terminal-breadcrumb .terminal-crumb-active,
   .terminal-breadcrumb .terminal-crumb-active:hover {
     color: #fafafa !important;
+  }
+
+  /* Just-demoted crumb (was terminal/white, now middle/dim). Fades color
+     down so the demotion doesn't snap. Attribute is removed on animationend
+     so it only plays once per navigation. */
+  .terminal-breadcrumb a[data-just-demoted] {
+    animation: crumb-demote 0ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes crumb-demote {
+    from {
+      color: #fafafa;
+    }
+    to {
+      color: rgba(250, 250, 250, 0.4);
+    }
+  }
+
+  /* Crumb shortcut chips fade in the moment THEIR crumb finishes typing, not
+     when the whole breadcrumb is done. Pre-filled crumbs (kept from the
+     previous page's shared prefix) and just-typed crumbs both count as
+     "ready," so each chip appears in step with its own crumb. */
+  .terminal-breadcrumb [data-crumb-segment] [data-shortcut] {
+    opacity: 1;
+    transition: opacity 200ms ease;
+  }
+  .terminal-breadcrumb[data-terminal-state="typing"]
+    [data-crumb-segment]
+    a:has(
+      [data-terminal-text]:not([data-terminal-prefilled]):not([data-terminal-typed])
+    )
+    [data-shortcut] {
+    opacity: 0;
+    transition: opacity 0s;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -306,6 +373,7 @@ const navHref = (hash: string) => `/${hash}`;
       if (reduceMotion()) {
         targets.forEach(function (t) {
           t.textContent = t.getAttribute("data-terminal-text") || "";
+          t.setAttribute("data-terminal-typed", "1");
         });
         root.setAttribute("data-terminal-state", "done");
         return;
@@ -317,6 +385,7 @@ const navHref = (hash: string) => `/${hash}`;
       targets.forEach(function (t) {
         if (!t.hasAttribute("data-terminal-prefilled")) {
           t.textContent = "";
+          t.removeAttribute("data-terminal-typed");
         }
       });
       root.setAttribute("data-terminal-state", "typing");
@@ -340,6 +409,7 @@ const navHref = (hash: string) => `/${hash}`;
         var pos = 0;
         function typeChar() {
           if (pos >= text.length) {
+            el.setAttribute("data-terminal-typed", "1");
             i++;
             setTimeout(typeNext, TYPE_GAP_BETWEEN_CRUMBS_MS);
             return;
@@ -560,6 +630,14 @@ const navHref = (hash: string) => `/${hash}`;
     // Type on first load and after every view-transition swap.
     document.addEventListener("astro:page-load", typeBreadcrumb);
 
+    // Strip the `data-just-demoted` marker after the demote animation runs,
+    // so subsequent restyles (re-render, hover) don't replay the fade.
+    document.addEventListener("animationend", function (e) {
+      if (e.animationName !== "crumb-demote") return;
+      var t = e.target;
+      if (t && t.removeAttribute) t.removeAttribute("data-just-demoted");
+    });
+
     // Diff-aware exit: backspace only the differing tail, pre-fill the new
     // document's crumbs with the shared prefix so the post-swap typing skips
     // them.
@@ -591,6 +669,18 @@ const navHref = (hash: string) => `/${hash}`;
               newTargets[i].setAttribute("data-terminal-prefilled", "1");
             } else {
               newTargets[i].textContent = "";
+            }
+          }
+          // Going deeper? The crumb that was *terminal* on the old page
+          // (last index in oldCrumbs) is now a middle link — mark its anchor
+          // so CSS can fade its color from white → dim instead of flipping
+          // instantly.
+          if (newCrumbs.length > oldCrumbs.length && oldCrumbs.length >= 1) {
+            var demotedIdx = oldCrumbs.length - 1;
+            var demotedTarget = newTargets[demotedIdx];
+            var demotedAnchor = demotedTarget && demotedTarget.closest("a");
+            if (demotedAnchor) {
+              demotedAnchor.setAttribute("data-just-demoted", "1");
             }
           }
         }

@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
+import KbdChip from "@components/KbdChip.astro";
 import { PROJECTS } from "@consts";
 
 const projects = (await getCollection("projects"))
@@ -34,6 +35,29 @@ const formatCounts = (c: { work: number; experiments: number }) => {
   if (c.experiments > 0) parts.push(pluralize(c.experiments, "experiment"));
   return parts.join(" · ");
 };
+
+// Build keyboard shortcuts from the first 3 alphanumeric characters of each
+// project's display name. Disambiguates collisions by stepping further into
+// the name so every project gets a unique 3-char shortcut.
+const shortcutFor = (name: string, offset = 0) => {
+  const letters = name.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return letters.slice(offset, offset + 3);
+};
+
+const shortcutMap = new Map<string, string>();
+const usedShortcuts = new Set<string>();
+for (const project of projects) {
+  const name = project.data.client ?? project.data.title;
+  let shortcut = shortcutFor(name);
+  let offset = 1;
+  while (shortcut.length === 3 && usedShortcuts.has(shortcut)) {
+    shortcut = shortcutFor(name, offset++);
+  }
+  if (shortcut.length === 3) {
+    shortcutMap.set(project.slug, shortcut);
+    usedShortcuts.add(shortcut);
+  }
+}
 ---
 
 <PageLayout
@@ -55,13 +79,20 @@ const formatCounts = (c: { work: number; experiments: number }) => {
             const tags = project.data.tags ?? [];
             const counts = countsForProject(project.slug);
             const countsLabel = formatCounts(counts);
+            const shortcut = shortcutMap.get(project.slug);
             return (
               <li>
                 <a
                   href={`/projects/${project.slug}`}
                   class="project-card group relative overflow-hidden flex h-72 flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
                 >
-                  <div class="relative z-10 space-y-3">
+                  {shortcut && (
+                    <KbdChip
+                      keys={shortcut}
+                      class="absolute top-3 right-3 z-20"
+                    />
+                  )}
+                  <div class="relative z-10 space-y-3 pr-16">
                     <h2 class="text-2xl font-semibold text-[#FAFAFA]">
                       {project.data.client ?? project.data.title}
                     </h2>
