@@ -26,20 +26,22 @@ const navHref = (hash: string) => `/${hash}`;
   transition:name="site-nav-backdrop"
 ></div>
 
-<!-- Persisted logo, lifted out of the header's view-transition snapshot for
-     the same reason as the backdrop: it stays the same DOM element across
-     every navigation, so it can never flicker. The header keeps an invisible
-     placeholder of the same dimensions to preserve the flex layout. -->
-<div
-  class="site-nav-logo"
-  transition:persist="site-nav-logo"
-  transition:name="site-nav-logo"
->
+<!-- Logo overlay. Lifted out of the header's view-transition snapshot so it
+     can get its own no-animation rules and never fade with the root. We
+     deliberately do NOT `transition:persist` it — Astro's persist detaches
+     and reattaches the live element across the swap, and that detach can
+     leave a single-frame flicker on a fixed-positioned element. The image
+     is eager-loaded and identical on every page, so re-rendering it each
+     nav is effectively free. The header keeps an invisible placeholder of
+     the same dimensions to preserve the flex layout. -->
+<div class="site-nav-logo" transition:name="site-nav-logo">
   <Container>
     <Link href="/" underline={false} class="inline-block pointer-events-auto">
       <img
         src="/logo.svg"
         alt={`${SITE.NAME} logo`}
+        width="129"
+        height="24"
         class="h-6 w-auto"
         loading="eager"
       />
@@ -58,6 +60,8 @@ const navHref = (hash: string) => `/${hash}`;
         <img
           src="/logo.svg"
           alt=""
+          width="129"
+          height="24"
           class="h-6 w-auto invisible"
           loading="eager"
         />
@@ -66,9 +70,9 @@ const navHref = (hash: string) => `/${hash}`;
       <nav
         class="hidden order-2 md:order-3 ml-auto items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
       >
-        <Link href={navHref("#services")} underline={false}>Services</Link>
-        <Link href={navHref("#projects")} underline={false}>Projects</Link>
-        <Link href={navHref("#blog")} underline={false}>Blog</Link>
+        <Link href="/services" underline={false}>Services</Link>
+        <Link href="/projects" underline={false}>Projects</Link>
+        <Link href="/blog" underline={false}>Blog</Link>
         <Link href={navHref("#contact")} underline={false}>Contact</Link>
       </nav>
 
@@ -110,9 +114,9 @@ const navHref = (hash: string) => `/${hash}`;
         >
           <nav aria-label="Site menu" class="flex flex-col">
             {[
-              { label: "Services", href: navHref("#services") },
-              { label: "Projects", href: navHref("#projects") },
-              { label: "Blog", href: navHref("#blog") },
+              { label: "Services", href: "/services" },
+              { label: "Projects", href: "/projects" },
+              { label: "Blog", href: "/blog" },
               { label: "Contact", href: navHref("#contact") },
             ].map((item) => (
               <a

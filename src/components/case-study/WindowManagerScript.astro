@@ -144,9 +144,15 @@
         closeWindow(slug);
       });
 
-      // Popout: let default link navigation happen, but stopPropagation so the window doesn't think the parent was clicked
-      const popout = el.querySelector<HTMLAnchorElement>("[data-window-popout]");
-      popout?.addEventListener("click", (e) => e.stopPropagation());
+      // Popout: let default link navigation happen AND let the click bubble
+      // all the way to Astro's view-transition handler on `document`. An
+      // earlier version called `stopPropagation()` here to keep the window's
+      // mousedown listener from reacting, but that also blocked Astro from
+      // upgrading the click into a view-transition — so the popout fell back
+      // to a hard reload, which broke the breadcrumb's diff-aware pre-fill.
+      // The titlebar drag handler already skips clicks on buttons/anchors,
+      // and the window's `bringToFront` is harmless here, so the original
+      // mitigation isn't needed.
 
       // Drag from titlebar
       const titlebar = el.querySelector<HTMLElement>("[data-window-titlebar]");

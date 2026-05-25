@@ -4,8 +4,6 @@ import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import ContactSection from "@components/ContactSection.astro";
 import CaseStudyContent from "@components/case-study/CaseStudyContent.astro";
-import { ChevronRight } from "@lucide/astro";
-
 export async function getStaticPaths() {
   const caseStudies = (await getCollection("case-studies"))
     .filter((cs) => !cs.data.draft && cs.data.writeUp !== false);
@@ -33,18 +31,17 @@ const parentProject = projects.find((p) => p.slug.split("/")[0] === projectSlug)
 const clientName = parentProject?.data.client ?? parentProject?.data.title ?? projectSlug;
 ---
 
-<PageLayout title={`${entry.data.title} — ${clientName}`} description={entry.data.summary}>
+<PageLayout
+  title={`${entry.data.title} — ${clientName}`}
+  description={entry.data.summary}
+  breadcrumb={[
+    { label: "Projects", href: "/projects" },
+    { label: clientName, href: `/projects/${projectSlug}` },
+    { label: entry.data.title },
+  ]}
+>
   <Container>
     <div class="space-y-12 max-w-screen-xl mx-auto">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-[11px] uppercase tracking-widest text-[#FAFAFA]/40" aria-label="Breadcrumb">
-        <a href="/projects" class="hover:text-[#FAFAFA] transition-colors">Projects</a>
-        <ChevronRight size={10} />
-        <a href={`/projects/${projectSlug}`} class="hover:text-[#FAFAFA] transition-colors">{clientName}</a>
-        <ChevronRight size={10} />
-        <span class="text-[#FAFAFA]">{entry.data.title}</span>
-      </nav>
-
       <CaseStudyContent entry={entry} showHeader={true} fullPage={true} />
 
       <nav class="border-t border-white/10 pt-8">

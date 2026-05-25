@@ -29,7 +29,14 @@ const relatedPosts = (post.data.relatedPosts ?? [])
   .filter(Boolean);
 ---
 
-<PageLayout title={post.data.title} description={post.data.description}>
+<PageLayout
+  title={post.data.title}
+  description={post.data.description}
+  breadcrumb={[
+    { label: "Blog", href: "/blog" },
+    { label: post.data.title },
+  ]}
+>
   <Container>
    <div class="max-w-screen-lg mx-auto">
     <div class="animate">

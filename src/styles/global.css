@@ -179,12 +179,25 @@ article {
 ::view-transition-group(site-nav-logo) {
   animation: none !important;
 }
-::view-transition-old(site-nav-backdrop),
-::view-transition-old(site-nav-logo) {
+
+/* Backdrop: hide the old snapshot, show the new immediately. Its height can
+   change between pages (e.g. breadcrumb on/off), so overlapping both would
+   briefly double-stack. */
+::view-transition-old(site-nav-backdrop) {
   animation: none !important;
   display: none;
 }
-::view-transition-new(site-nav-backdrop),
+::view-transition-new(site-nav-backdrop) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Logo: keep BOTH snapshots visible at full opacity. The logo doesn't change
+   between pages, so the snapshots are visually identical — overlapping them
+   eliminates the brief gap that `display: none` on the old snapshot can
+   leave between snapshot hide and live element show, which read as a flicker
+   on backward navigation. */
+::view-transition-old(site-nav-logo),
 ::view-transition-new(site-nav-logo) {
   animation: none !important;
   opacity: 1 !important;
