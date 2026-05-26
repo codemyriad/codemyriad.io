@@ -10,9 +10,8 @@
     const chips = document.querySelectorAll<HTMLElement>("[data-shortcut]");
     if (!chips.length) return;
 
-    // Reserved keys handled by dedicated listeners elsewhere (menu toggle,
-    // case-study window close, etc).
-    const RESERVED = new Set(["M", "X"]);
+    // Reserved keys handled by dedicated listeners elsewhere (menu toggle, etc).
+    const RESERVED = new Set(["M"]);
 
     const map = new Map<string, HTMLElement>();
     chips.forEach((chip) => {
@@ -51,9 +50,11 @@
         return;
       }
       // Backtick and tilde live on the same physical key — accept either so
-      // the `~` shortcut doesn't force a Shift press.
-      const ch = e.key === "`" ? "~" : e.key.toUpperCase();
-      if (!/[A-Z0-9~]/.test(ch)) return;
+      // the `~` shortcut doesn't force a Shift press. Same for `/` and `?`
+      // (the shortcut-guide key).
+      const ch =
+        e.key === "`" ? "~" : e.key === "/" ? "?" : e.key.toUpperCase();
+      if (!/[A-Z0-9~?]/.test(ch)) return;
 
       let next = buffer + ch;
       while (next.length && !prefixes.has(next)) next = next.slice(1);

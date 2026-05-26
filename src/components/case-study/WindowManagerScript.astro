@@ -231,22 +231,15 @@
       });
     });
 
-    // `X` closes the topmost open window. Lives here (not in the global
+    // `Esc` closes the topmost open window. Lives here (not in the global
     // shortcut handler) because "topmost" depends on the live z-order this
-    // script tracks — and because multiple windows would otherwise all carry
-    // a [data-shortcut="X"] chip, leaving the global handler no way to pick
-    // a winner. The global handler reserves "X" so it ignores those chips.
+    // script tracks. Defers to any earlier ESC handler that already acted —
+    // the menu toggle and shortcut-guide dialog both close themselves on ESC
+    // and call preventDefault(), so a single keypress only closes one layer.
     document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (e.defaultPrevented) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key !== "x" && e.key !== "X") return;
-      const t = e.target as Element | null;
-      if (
-        t?.closest?.(
-          'input, textarea, select, [contenteditable=""], [contenteditable="true"]'
-        )
-      ) {
-        return;
-      }
       let top: WindowState | null = null;
       windows.forEach((state) => {
         if (state.el.hidden) return;

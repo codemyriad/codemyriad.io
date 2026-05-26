@@ -2,12 +2,24 @@
 // Fixed bottom-left affordance that opens a modal listing every keyboard
 // shortcut wired through KbdChip and the dedicated handlers. Hidden under
 // `sm:` because typing without a keyboard isn't useful.
-import { Keyboard, X } from "@lucide/astro";
+import { Keyboard, Terminal, X } from "@lucide/astro";
 import KbdChip from "@components/KbdChip.astro";
 
-type Item = { keys: string[]; label: string };
+const accent = "#7EC7FF";
+
+type Item = {
+  keys: Array<string | { text: string }>;
+  label: string;
+};
 
 const groups: Array<{ title: string; items: Item[] }> = [
+  {
+    title: "This guide",
+    items: [
+      { keys: ["?"], label: "Toggle this guide (or unshifted /)" },
+      { keys: [{ text: "Esc" }], label: "Close" },
+    ],
+  },
   {
     title: "Navigation",
     items: [
@@ -17,12 +29,6 @@ const groups: Array<{ title: string; items: Item[] }> = [
       { keys: ["P"], label: "Projects" },
       { keys: ["B"], label: "Blog" },
       { keys: ["C"], label: "Contact" },
-    ],
-  },
-  {
-    title: "Breadcrumb",
-    items: [
-      { keys: ["P"], label: "Jump to ancestor crumb (first letter)" },
     ],
   },
   {
@@ -37,8 +43,8 @@ const groups: Array<{ title: string; items: Item[] }> = [
   {
     title: "Inside a project",
     items: [
-      { keys: ["1", "2", "3"], label: "Open case study window" },
-      { keys: ["X"], label: "Close topmost window" },
+      { keys: ["#"], label: "Number opens the matching case study" },
+      { keys: [{ text: "Esc" }], label: "Close topmost window" },
     ],
   },
 ];
@@ -47,11 +53,13 @@ const groups: Array<{ title: string; items: Item[] }> = [
 <button
   type="button"
   data-shortcut-guide-toggle
-  class="hidden sm:inline-flex fixed bottom-4 right-4 z-40 items-center justify-center w-9 h-9 border border-white/15 bg-black/40 hover:bg-white/10 hover:border-white/30 text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors backdrop-blur-sm"
+  data-shortcut="?"
+  class="hidden sm:inline-flex fixed bottom-4 right-4 z-40 items-center justify-center w-7 h-7 border border-white/20 bg-black/40 hover:bg-white/10 hover:border-white/30 text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors backdrop-blur-sm"
   aria-label="Show keyboard shortcuts"
   aria-haspopup="dialog"
   aria-controls="shortcut-guide-dialog"
   aria-expanded="false"
+  aria-keyshortcuts="?"
 >
   <Keyboard size={16} />
 </button>
@@ -79,24 +87,32 @@ const groups: Array<{ title: string; items: Item[] }> = [
 
   <!-- Panel -->
   <div
-    class="relative w-full max-w-md bg-[#0a0a0a] border border-white/15 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
+    class="relative w-full max-w-md bg-[#0a0a0a] border shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
+    style={`border-color: ${accent};`}
   >
     <header
-      class="flex items-center justify-between px-4 py-3 border-b border-white/10"
+      class="flex items-center justify-between gap-2 px-1.5 py-1.5"
+      style={`background: #0a0a0a; border-bottom: 2px solid ${accent};`}
     >
-      <h2
-        id="shortcut-guide-title"
-        class="font-mono text-xs uppercase tracking-[0.15em] text-[#FAFAFA]/80"
-      >
-        Keyboard shortcuts
-      </h2>
+      <div class="flex items-center gap-2 min-w-0">
+        <Terminal size={14} color={accent} />
+        <h2
+          id="shortcut-guide-title"
+          class="font-mono text-xs uppercase tracking-[0.12em] truncate"
+          style={`color: ${accent};`}
+        >
+          keyboard_shortcuts.log
+        </h2>
+      </div>
       <button
         type="button"
         data-shortcut-guide-close
-        class="inline-flex items-center justify-center w-7 h-7 border border-white/15 hover:border-white/30 hover:bg-white/10 text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors"
+        class="inline-flex items-center justify-center w-4 h-4 bg-[#111111] border cursor-pointer"
+        style={`border-color: ${accent};`}
         aria-label="Close"
+        aria-keyshortcuts="Escape"
       >
-        <X size={14} />
+        <X size={12} color={accent} />
       </button>
     </header>
 
@@ -112,9 +128,13 @@ const groups: Array<{ title: string; items: Item[] }> = [
             {group.items.map((item) => (
               <li class="flex items-center gap-3 text-xs text-[#FAFAFA]/80">
                 <span class="inline-flex items-center gap-1 shrink-0">
-                  {item.keys.map((k) => (
-                    <KbdChip keys={k} />
-                  ))}
+                  {item.keys.map((k) =>
+                    typeof k === "string" ? (
+                      <KbdChip keys={k} />
+                    ) : (
+                      <KbdChip keys={k.text} text />
+                    )
+                  )}
                 </span>
                 <span>{item.label}</span>
               </li>
@@ -160,12 +180,19 @@ const groups: Array<{ title: string; items: Item[] }> = [
     closeBtn?.addEventListener("click", () => setOpen(false));
     backdrop?.addEventListener("click", () => setOpen(false));
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      if (dialog.getAttribute("data-open") !== "true") return;
-      e.preventDefault();
-      setOpen(false);
-    });
+    // Capture phase: this listener runs before bubble-phase ESC handlers
+    // (menu, case-study window). If the guide is open, we close it and call
+    // preventDefault so the others see e.defaultPrevented and stand down.
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key !== "Escape") return;
+        if (dialog.getAttribute("data-open") !== "true") return;
+        e.preventDefault();
+        setOpen(false);
+      },
+      { capture: true }
+    );
   };
 
   init();
