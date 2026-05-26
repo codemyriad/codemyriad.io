@@ -1,0 +1,416 @@
+---
+// Internal kitchen-sink for the case-study components. Renders every reusable
+// component with realistic-but-generic placeholder data so the chrome can be
+// refined out of narrative context. Embedded into both the standalone /lab
+// page and the in-project terminal-window version.
+import Stage from "./Stage.astro";
+import Quote from "./Quote.astro";
+import Callout from "./Callout.astro";
+import InlineNote from "./InlineNote.astro";
+import MetricsBar from "./MetricsBar.astro";
+import OutcomeGrid from "./OutcomeGrid.astro";
+import StateList from "./StateList.astro";
+import BeforeAfterSlider from "./BeforeAfterSlider.astro";
+import { Database, Cpu } from "@lucide/astro";
+
+// Each section's prop signature, rendered as a small structured definition
+// list so authors can see at a glance what's required vs optional and which
+// values each prop accepts.
+type PropRow = { name: string; type: string; status: string };
+const propsRows = (rows: PropRow[]) => rows;
+---
+
+<div class="space-y-24">
+  <!-- Intro — shared between the page and the in-window versions so both
+       open with the same framing. -->
+  <header class="space-y-3">
+    <span class="text-[10px] uppercase tracking-[0.2em] text-[#FAFAFA]/60 font-mono">
+      Internal · reference
+    </span>
+    <h1 class="text-2xl font-bold tracking-tight text-[#FAFAFA]">
+      Case study components
+    </h1>
+    <p class="text-sm text-body max-w-2xl leading-relaxed">
+      Every reusable component used inside case studies, rendered out of
+      narrative context with placeholder data. Use this to refine the
+      components themselves, or as a copy-paste reference when authoring a
+      new MDX case study.
+    </p>
+  </header>
+
+  <!-- Stage ------------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        Stage
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Section wrapper with a sticky label column. Use to break a case study
+        into named beats (Discovery, Build, Outcome…). Children render in the
+        right column.
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          { name: "label", type: "string", status: "required" },
+          { name: "heading", type: "string", status: "optional" },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import Stage from "@components/case-study/Stage.astro";
+      </code>
+    </header>
+
+    <Stage label="Discovery" heading="Where the project started">
+      <p>
+        The client came to us with a monthly reporting workflow held together
+        by spreadsheets and exported PDFs. They knew it didn't scale; what they
+        didn't yet know was which piece to replace first.
+      </p>
+      <p>
+        Two weeks of pairing with their ops lead surfaced the actual
+        bottleneck — and a much smaller v1 than anyone had pitched.
+      </p>
+    </Stage>
+  </section>
+
+  <!-- Callout ----------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        Callout
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Boxed note with a header and optional icon. Use for technical asides,
+        architecture notes, or "why we chose X" interjections within prose.
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          { name: "title", type: "string", status: "required" },
+          { name: "icon", type: "any Lucide icon", status: "optional" },
+          { name: "accent", type: `"teal" | "amber"`, status: `default "teal"` },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import Callout from "@components/case-study/Callout.astro";
+        <br />
+        import {"{ Database }"} from "@lucide/astro";
+      </code>
+    </header>
+
+    <div class="space-y-6">
+      <Callout title="Why local-first">
+        Sync conflicts are an actual problem, not a future one. Choosing
+        cr-sqlite from day one meant we never had to retrofit conflict
+        resolution into an existing architecture.
+      </Callout>
+
+      <Callout title="Runtime trade-off" icon={Cpu} accent="amber">
+        We picked the slower-but-correct implementation. The fast path is a
+        known refactor once the workflow is settled.
+      </Callout>
+    </div>
+  </section>
+
+  <!-- InlineNote -------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        InlineNote
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Quieter, italic aside with a neutral white left border. Use sparingly —
+        for a single sentence of meta-commentary inside a stage. No
+        configurable props beyond the slot (kept intentionally simple so
+        accented sidebars stay distinct as the Quote component).
+      </p>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import InlineNote from "@components/case-study/InlineNote.astro";
+      </code>
+    </header>
+
+    <InlineNote>
+      In hindsight, the spreadsheet wasn't broken — the manual reconciliation
+      on top of it was.
+    </InlineNote>
+  </section>
+
+  <!-- Quote ------------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        Quote
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Pulled testimonial or framing line. Use sparingly to mark a beat that
+        should land.
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          { name: "attribution", type: "string", status: "optional" },
+          { name: "accent", type: `"teal" | "amber"`, status: `default "teal"` },
+          { name: "size", type: `"default" | "large"`, status: `default "default"` },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import Quote from "@components/case-study/Quote.astro";
+      </code>
+    </header>
+
+    <div class="space-y-6">
+      <Quote attribution="Ops Lead, client team">
+        We used to lose half a day every month chasing missing rows. Now
+        the report just… exists on the first.
+      </Quote>
+
+      <Quote attribution="Founder" accent="amber" size="large">
+        You shipped the thing I'd been describing for three years.
+      </Quote>
+    </div>
+  </section>
+
+  <!-- StateList --------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        StateList
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Titled list of short, bulleted points. Good for "what we considered",
+        "constraints", or "what changed".
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          { name: "title", type: "string", status: "required" },
+          { name: "items", type: "string[]", status: "required" },
+          { name: "icon", type: "any Lucide icon", status: "optional" },
+          { name: "accent", type: `"teal" | "amber"`, status: `default "amber"` },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import StateList from "@components/case-study/StateList.astro";
+      </code>
+    </header>
+
+    <div class="space-y-6">
+      <StateList
+        title="What we ruled out"
+        items={[
+          "A new dashboard tool — the team already had three.",
+          "A spreadsheet plugin — solved the symptom, not the cause.",
+          "Outsourcing the monthly close — locks them in further.",
+        ]}
+      />
+
+      <StateList
+        title="What the v1 included"
+        icon={Database}
+        accent="teal"
+        items={[
+          "A single source of truth for monthly bookings.",
+          "Auto-generated PDF and web reports per property.",
+          "A read-only client portal with magic-link access.",
+        ]}
+      />
+    </div>
+  </section>
+
+  <!-- MetricsBar -------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        MetricsBar
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Inline strip of headline numbers. Lays out as 1/2/3/4 columns based on
+        the length of <code class="font-mono">metrics</code> — the grid responds
+        automatically.
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          {
+            name: "metrics",
+            type: "{ label: string; value: string }[]",
+            status: "required",
+          },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import MetricsBar from "@components/case-study/MetricsBar.astro";
+      </code>
+    </header>
+
+    <MetricsBar
+      metrics={[
+        { value: "−4hrs", label: "Per property per month" },
+        { value: "100%", label: "On-time monthly reports" },
+        { value: "0", label: "Manual spreadsheet steps remaining" },
+      ]}
+    />
+  </section>
+
+  <!-- OutcomeGrid ------------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        OutcomeGrid
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Vertical list of outcomes (title + short paragraph) tagged with a
+        short ID in a narrow left column. Pairs well after a MetricsBar —
+        numbers above, narrative below.
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          {
+            name: "outcomes",
+            type: "{ title: string; description: string }[]",
+            status: "required",
+          },
+          { name: "heading", type: "string", status: "optional" },
+          {
+            name: "numbering",
+            type: `"numeric" | "alpha"`,
+            status: `default "numeric"`,
+          },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import OutcomeGrid from "@components/case-study/OutcomeGrid.astro";
+      </code>
+    </header>
+
+    <div class="space-y-10">
+      <OutcomeGrid
+        heading="What changed for the team"
+        outcomes={[
+          {
+            title: "Monthly close is now a checkbox",
+            description:
+              "What used to be a half-day of reconciliation is a single click. The first of every month is no longer a dreaded date.",
+          },
+          {
+            title: "New properties onboard in an afternoon",
+            description:
+              "Adding a property to the report set used to mean threading a new tab into every spreadsheet. Now it's a form.",
+          },
+          {
+            title: "Clients see what we see",
+            description:
+              "The same report the ops team relies on is what each client gets in their inbox. No second source, no surprises.",
+          },
+        ]}
+      />
+
+      <OutcomeGrid
+        numbering="alpha"
+        outcomes={[
+          {
+            title: "Reports survive the internet",
+            description:
+              "Local-first sync means a flaky connection no longer means a missing month.",
+          },
+          {
+            title: "Audit trail by default",
+            description:
+              "Every value in every report is traceable back to a source row, with no extra effort from the team.",
+          },
+        ]}
+      />
+    </div>
+  </section>
+
+  <!-- BeforeAfterSlider ------------------------------------------------- -->
+  <section class="space-y-6">
+    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+        BeforeAfterSlider
+      </h3>
+      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+        Draggable comparison between two images (the classic "before / after"
+        wipe). Use to show a redesigned interface, a cleaned-up data view, or
+        any state change that reads visually. Source images can be passed as
+        props or via named slots (<code class="font-mono">before</code> /
+        <code class="font-mono">after</code>) for richer content.
+      </p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs font-mono max-w-md">
+        {propsRows([
+          { name: "beforeSrc", type: "string (URL)", status: "optional" },
+          { name: "afterSrc", type: "string (URL)", status: "optional" },
+          { name: "beforeAlt", type: "string", status: `default "Before"` },
+          { name: "afterAlt", type: "string", status: `default "After"` },
+          { name: "beforeLabel", type: "string", status: `default "Before"` },
+          { name: "afterLabel", type: "string", status: `default "After"` },
+          { name: "aspectRatio", type: "string (CSS)", status: `default "16 / 10"` },
+        ]).map((p) => (
+          <Fragment>
+            <dt class="text-[#FAFAFA]">{p.name}</dt>
+            <dd class="text-[#FAFAFA]/75">
+              {p.type}{" "}
+              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+        import BeforeAfterSlider from "@components/case-study/BeforeAfterSlider.astro";
+      </code>
+    </header>
+
+    <BeforeAfterSlider
+      beforeSrc="/case-studies/03-aire-spaces/before.png"
+      afterSrc="/case-studies/03-aire-spaces/after.png"
+      beforeAlt="Original Excel-based reporting workflow"
+      afterAlt="New automated reporting dashboard"
+      beforeLabel="Before — Excel + manual steps"
+      afterLabel="After — Automated reports"
+    />
+  </section>
+</div>

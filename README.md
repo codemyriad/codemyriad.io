@@ -26,6 +26,21 @@ Replace npm with your package manager of choice. `npm`, `pnpm`, `yarn`, `bun`, e
 | `npm run lint`            | Run ESLint                                        |
 | `npm run lint:fix`        | Auto-fix ESLint issues                            |
 
+## 🧩 Case study components
+
+Reusable building blocks for case-study write-ups live in
+`src/components/case-study/` — `Stage`, `Callout`, `Quote`, `InlineNote`,
+`MetricsBar`, `OutcomeGrid`, `StateList`. Each is documented with
+placeholder data in the internal reference:
+
+- **Page**: [`/lab/case-study-components`](/lab/case-study-components) — full-page view, easiest for visual refinement.
+- **In-context**: from any project page (e.g. `/projects/03-aire-spaces`), press <kbd>⌘ Shift K</kbd> (or <kbd>Ctrl Shift K</kbd>) to open the same reference as a draggable terminal window — handy while authoring a new case study.
+
+The terminal-window chrome itself is `TerminalWindow.astro`; `CaseStudyWindow`
+is a thin wrapper around it that supplies case-study-specific content.
+
+`/lab/` is `noindex`'d and disallowed in `robots.txt`.
+
 ## 🏛️ License
 
 MIT

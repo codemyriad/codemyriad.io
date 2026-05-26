@@ -17,6 +17,7 @@ outcomes:
 
 import Callout from "@components/case-study/Callout.astro";
 import InlineNote from "@components/case-study/InlineNote.astro";
+import { Layers } from "@lucide/astro";
 
 ## Cutting out the manual data entry entirely.
 
@@ -24,7 +25,7 @@ With the core application running, the next stage was eliminating the manual ste
 
 We also built an admin-side report workbench: a structured interface for reviewing the pulled data, supplementing it with the fields that still come from outside Hostaway, and confirming before reports are generated. This gave the team a clear and controlled place to handle edge cases without having to touch a spreadsheet.
 
-<Callout title="On building the integration" icon="layers">
+<Callout title="On building the integration" icon={Layers}>
   <ul class="space-y-3 list-none p-0">
     <li class="flex gap-3"><span style="color: #7EC7FF;">•</span><span>Explored the Hostaway API surface before committing to any data model.</span></li>
     <li class="flex gap-3"><span style="color: #7EC7FF;">•</span><span>Drafted a CLI tool first — faster to validate the integration without the bulk of the application UI around it.</span></li>

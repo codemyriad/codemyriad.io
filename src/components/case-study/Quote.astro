@@ -18,14 +18,14 @@ const textSize = size === "large" ? "text-2xl md:text-4xl" : "text-xl md:text-2x
 ---
 
 <div
-  class={`bg-white/5 border-y border-r border-white/10 border-l-2 p-10 md:p-16 ${className}`}
+  class={`bg-white/5 border-y border-r border-white/10 border-l-2 p-4 md:p-8 ${className}`}
   style={`border-left-color: ${borderColor};`}
 >
-  <blockquote class={`${textSize} italic leading-tight mb-6 text-[#FAFAFA]`}>
+  <blockquote class={`${textSize} italic leading-tight mb-3 text-[#FAFAFA]`}>
     <slot />
   </blockquote>
   {attribution && (
-    <cite class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 not-italic">
+    <cite class="text-sm text-[#FAFAFA]/80 not-italic">
       — {attribution}
     </cite>
   )}

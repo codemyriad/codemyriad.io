@@ -17,23 +17,37 @@ const slug = id ?? label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-
   data-stage
   data-stage-label={label}
   data-stage-heading={heading ?? ""}
-  class={`grid grid-cols-1 md:grid-cols-[160px_1fr] gap-8 md:gap-12 ${className}`}
+  class={`grid grid-cols-1 md:grid-cols-[1fr_5fr] gap-3 md:gap-6 ${className}`}
 >
   <div>
-    <div class="md:sticky md:top-24">
-      <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 block">
+    <div class="stage-label-sticky md:sticky">
+      <span class="text-xs uppercase tracking-widest text-[#FAFAFA]/80 block pt-2">
         {label}
       </span>
     </div>
   </div>
   <div class="space-y-6">
     {heading && (
-      <h2 class="text-2xl md:text-3xl font-bold leading-tight text-[#FAFAFA]">
+      <h2 class="!mt-0 text-2xl md:text-3xl font-bold leading-tight text-[#FAFAFA]">
         {heading}
       </h2>
     )}
-    <div class="prose-stage space-y-6 text-body text-sm md:text-base leading-relaxed max-w-3xl">
+    <div class="prose-stage space-y-6 text-body text-sm md:text-base leading-relaxed">
       <slot />
     </div>
   </div>
 </section>
+
+<style is:global>
+  /* Stage's sticky label needs different top offsets depending on context.
+     On a page, it clears the fixed site nav. Inside a terminal window the
+     window body IS the scroll container, so we just want a small inset
+     from the title bar. The ancestor selector lets the surrounding context
+     override without the Stage component knowing about it. */
+  [data-stage] .stage-label-sticky {
+    top: 5rem;
+  }
+  [data-window-body] [data-stage] .stage-label-sticky {
+    top: 1rem;
+  }
+</style>

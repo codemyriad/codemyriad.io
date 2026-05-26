@@ -12,15 +12,16 @@ type Props = {
   title: string;
   description: string;
   breadcrumb?: BreadcrumbItem[];
+  noindex?: boolean;
 };
 
-const { title, description, breadcrumb } = Astro.props;
+const { title, description, breadcrumb, noindex = false } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <Head title={`${title} | ${SITE.NAME}`} description={description} />
+    <Head title={`${title} | ${SITE.NAME}`} description={description} noindex={noindex} />
   </head>
   <body>
     <Header breadcrumb={breadcrumb} />

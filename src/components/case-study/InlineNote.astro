@@ -1,18 +1,15 @@
 ---
+// Quiet italic aside with a neutral white left border. Use sparingly — for
+// a single sentence of meta-commentary inside a stage. No color variant
+// (intentionally distinct from Quote, which carries the accent bar).
 type Props = {
-  color?: "teal" | "amber";
   class?: string;
 };
 
-const { color = "teal", class: className = "" } = Astro.props;
-
-const borderColor = color === "amber" ? "#F4915C" : "#7EC7FF";
+const { class: className = "" } = Astro.props;
 ---
 
-<div
-  class={`pl-6 py-4 bg-white/5 border-l-2 ${className}`}
-  style={`border-left-color: ${borderColor};`}
->
+<div class={`not-prose p-4 bg-white/5 border-l-2 border-white/25 ${className}`}>
   <p class="text-sm italic text-[#FAFAFA] leading-relaxed max-w-2xl">
     <slot />
   </p>

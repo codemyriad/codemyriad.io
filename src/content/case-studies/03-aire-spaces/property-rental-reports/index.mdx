@@ -35,10 +35,11 @@ import InlineNote from "@components/case-study/InlineNote.astro";
 import Callout from "@components/case-study/Callout.astro";
 import StateList from "@components/case-study/StateList.astro";
 import VideoPlayer from "@components/VideoPlayer.astro";
-import BeforeAfterSlider from "@components/BeforeAfterSlider.astro";
-import ArchDiagram from "@components/case-study/03-aire-spaces/property-rental-reports/ArchDiagram.astro";
+import BeforeAfterSlider from "@components/case-study/BeforeAfterSlider.astro";
+import ArchDiagram from "./ArchDiagram.astro";
+import { Database } from "@lucide/astro";
 
-## How it started — a series of spreadsheets that were, honestly, a mess.
+<Stage label="How it started" heading="A series of spreadsheets that were, honestly, a mess.">
 
 Aire Spaces came to us with a reporting problem. What they showed us was a series of interconnected Excel sheets — duplicated steps to move data between tabs, manual copy-paste between sources, and one sheet essentially acting as a database for eleven months of property revenue. It held together, in the way that hand-built spreadsheets tend to. But it was fragile, hard to hand off, and impossible to scale.
 
@@ -57,7 +58,7 @@ On top of this, the reporting workflow crossed over with their invoicing process
 
 <StateList
   title="The state of things"
-  icon="database"
+  icon={Database}
   accent="amber"
   items={[
     "Interconnected Excel sheets with duplicated data movement",
@@ -67,6 +68,8 @@ On top of this, the reporting workflow crossed over with their invoicing process
     "Reporting and invoicing prep intertwined, adding friction to both",
   ]}
 />
+
+</Stage>
 
 <Stage label="Workflow fit" heading="Fitting into their workflow">
 

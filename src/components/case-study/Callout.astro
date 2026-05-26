@@ -1,22 +1,27 @@
 ---
-import { Layers, Database, Cpu, Lightbulb } from "@lucide/astro";
+// Boxed, titled callout. Author passes any Lucide icon as a component
+// reference via the `icon` prop:
+//
+//   import { Database } from "@lucide/astro";
+//   <Callout title="Data shape" icon={Database} accent="teal">…</Callout>
+//
+// Accent stays a curated enum so case studies share a consistent palette.
 
 type Props = {
   title: string;
-  icon?: "layers" | "database" | "cpu" | "lightbulb";
+  icon?: any;
   accent?: "teal" | "amber";
   class?: string;
 };
 
-const { title, icon, accent = "teal", class: className = "" } = Astro.props;
+const { title, icon: Icon, accent = "teal", class: className = "" } = Astro.props;
 
 const accentColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
-const Icon = icon === "database" ? Database : icon === "cpu" ? Cpu : icon === "lightbulb" ? Lightbulb : icon === "layers" ? Layers : null;
 ---
 
-<div class={`border border-white/10 p-8 bg-white/[0.03] ${className}`}>
+<div class={`not-prose border border-white/10 p-4 bg-white/5 ${className}`}>
   <h4
-    class="text-xs uppercase tracking-[0.2em] font-bold mb-6 flex items-center gap-3 text-[#FAFAFA]"
+    class="text-sm uppercase tracking-[0.2em] font-bold mb-3 flex items-center gap-3 text-[#FAFAFA]"
   >
     {Icon && <Icon size={14} color={accentColor} />}
     <span>{title}</span>

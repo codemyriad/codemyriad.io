@@ -205,7 +205,7 @@
     };
 
     const init = () => {
-      initOnce("[data-case-study-window]", initWindow);
+      initOnce("[data-terminal-window]", initWindow);
       initOnce("[data-case-study-card]", initCard);
 
       // Restore open windows from hash
@@ -229,6 +229,18 @@
         state.el.style.left = `${state.x}px`;
         state.el.style.top = `${state.y}px`;
       });
+    });
+
+    // `Cmd+Shift+K` (Ctrl+Shift+K on non-Mac) opens the internal components
+    // reference window if it's rendered on this page. Deliberately gated
+    // behind modifier keys so it's not discoverable by accident — this is
+    // a build/handoff tool, not a feature.
+    document.addEventListener("keydown", (e) => {
+      if (!(e.metaKey || e.ctrlKey) || !e.shiftKey) return;
+      if (e.key !== "k" && e.key !== "K") return;
+      if (!windows.has("components-reference")) return;
+      e.preventDefault();
+      openWindow("components-reference");
     });
 
     // `Esc` closes the topmost open window. Lives here (not in the global
