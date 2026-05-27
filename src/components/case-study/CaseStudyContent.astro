@@ -23,12 +23,12 @@ const {
   media,
   tags,
   related,
-  status,
-  type,
+  // status,
+  // type,
 } = entry.data;
 
-const statusLabel = status ?? (type === "experiment" ? "Experiment" : "Shipped");
-const accent = type === "experiment" ? "#F4915C" : "#7EC7FF";
+// const statusLabel = status ?? (type === "experiment" ? "Experiment" : "Shipped");
+// const accent = type === "experiment" ? "#F4915C" : "#7EC7FF";
 
 // Resolve related blog references
 const relatedEntries = related && related.length > 0 ? await getEntries(related) : [];

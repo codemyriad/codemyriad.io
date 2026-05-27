@@ -252,12 +252,13 @@
       if (e.key !== "Escape") return;
       if (e.defaultPrevented) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      let top: WindowState | null = null;
-      windows.forEach((state) => {
-        if (state.el.hidden) return;
-        if (state.el.hasAttribute("data-window-closing")) return;
-        if (!top || state.z > top.z) top = state;
-      });
+      
+      const top = Array.from(windows.values()).reduce<WindowState | null>((acc, state) => {
+        if (state.el.hidden) return acc;
+        if (state.el.hasAttribute("data-window-closing")) return acc;
+        return !acc || state.z > acc.z ? state : acc;
+      }, null);
+
       if (!top) return;
       e.preventDefault();
       closeWindow(top.slug);

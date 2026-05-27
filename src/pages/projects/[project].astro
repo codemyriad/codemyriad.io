@@ -8,7 +8,6 @@ import TerminalWindow from "@components/case-study/TerminalWindow.astro";
 import CaseStudyContent from "@components/case-study/CaseStudyContent.astro";
 import ComponentsReference from "@components/case-study/ComponentsReference.astro";
 import KbdChip from "@components/KbdChip.astro";
-import { Terminal } from "@lucide/astro";
 
 export async function getStaticPaths() {
   const projects = (await getCollection("projects"))
@@ -18,8 +17,6 @@ export async function getStaticPaths() {
     props: { project },
   }));
 }
-
-type Props = { project: CollectionEntry<"projects"> };
 
 const { project } = Astro.props;
 const { Content } = await project.render();
