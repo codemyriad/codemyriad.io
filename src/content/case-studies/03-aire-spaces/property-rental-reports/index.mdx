@@ -1,0 +1,106 @@
+---
+title: "Property Rental Reports"
+summary: "Replaced spreadsheet-driven monthly client reporting with an automated reporting application. CSV ingestion, report generation, dual delivery as a web page and PDF, Supabase-backed client portal with access control."
+type: "shipped"
+stage: "Stage 1"
+ctaLabel: "Read case study →"
+date: 2025-09-01
+tags: ["Workflow Automation", "Reporting"]
+services:
+  - 02-fixing-brittle-internal-systems
+  - 03-short-feedback-loops
+related:
+  - report-takes-all-day
+  - manual-process-cost
+metrics:
+  - label: "Hours back per property per month"
+    value: "3"
+  - label: "Manual formatting steps"
+    value: "0"
+  - label: "Multiple assets, one source"
+    value: "PDF + Web"
+outcomes:
+  - title: "A report that could grow"
+    description: "The redesigned format gave Aire Spaces room they did not have before. Additions made in later stages would not have been possible in the original layout. Rapid prototyping made this possible in days, not weeks."
+  - title: "A process that fit"
+    description: "We did not ask Aire Spaces to change how they worked in order to adopt the system. The system earned its place gradually — modifying as little as possible and building around what already existed."
+  - title: "History that builds itself"
+    description: "Supabase as the persistence layer means every month of data accumulates without anyone managing it. The historical view is a byproduct of normal operation, not a separate project."
+  - title: "Access without email chains"
+    description: "Clients log in to a portal. Reports live there, permanently. No more sending links, no more broken attachments, no more chasing the right version."
+---
+
+import Stage from "@components/case-study/Stage.astro";
+import InlineNote from "@components/case-study/InlineNote.astro";
+import Callout from "@components/case-study/Callout.astro";
+import StateList from "@components/case-study/StateList.astro";
+import VideoPlayer from "@components/VideoPlayer.astro";
+import BeforeAfterSlider from "@components/case-study/BeforeAfterSlider.astro";
+import ArchDiagram from "./ArchDiagram.astro";
+import { Database } from "@lucide/astro";
+
+<Stage label="How it started" heading="A series of spreadsheets that were, honestly, a mess.">
+
+Aire Spaces came to us with a reporting problem. What they showed us was a series of interconnected Excel sheets — duplicated steps to move data between tabs, manual copy-paste between sources, and one sheet essentially acting as a database for eleven months of property revenue. It held together, in the way that hand-built spreadsheets tend to. But it was fragile, hard to hand off, and impossible to scale.
+
+Their existing client report was functional but not pretty. No branding. Column labels that were overly clustered and hard to read. Little room for growth — things had been added over time in ways that left the layout brittle. As it turned out, some of the improvements we delivered later in the engagement would not have been possible in the format they started with.
+
+On top of this, the reporting workflow crossed over with their invoicing process. Not cleanly — invoicing prep sat adjacent to reporting in a way that added time and friction to what was already a slow monthly cycle. That overlap became part of the brief.
+
+<BeforeAfterSlider
+  beforeSrc="/case-studies/03-aire-spaces/before.png"
+  afterSrc="/case-studies/03-aire-spaces/after.png"
+  beforeAlt="The original Excel-based reporting workflow"
+  afterAlt="The new automated reporting dashboard"
+  beforeLabel="Before — Excel + manual steps"
+  afterLabel="After — Automated reports"
+/>
+
+<StateList
+  title="The state of things"
+  icon={Database}
+  accent="amber"
+  items={[
+    "Interconnected Excel sheets with duplicated data movement",
+    "A single sheet acting as an 11-month revenue database",
+    "Client reports with hard-to-read columns",
+    "No room to extend the report format without breaking it",
+    "Reporting and invoicing prep intertwined, adding friction to both",
+  ]}
+/>
+
+</Stage>
+
+<Stage label="Workflow fit" heading="Fitting into their workflow">
+
+The first thing we established was a constraint: whatever we built as a first step had to slot into how Aire Spaces already worked. We were not going to ask them to take a great leap from one month to the next — the system had to earn its place gradually. So we made a small but meaningful modification to their existing sheet workflow, producing a CSV template they could drop into a simple upload interface. First step: fill out this slightly modified template and drop it here. That was it. No disruption. No retraining.
+
+<VideoPlayer src="/videos/property-report.webm" />
+
+<InlineNote>
+The highlight of shaping this stage was realising that whatever we do first NEEDS to fit into their workflow. We modified as little as possible and built around what already existed.
+</InlineNote>
+
+</Stage>
+
+<Stage label="Prototyping" heading="Rapid prototyping the report">
+
+Before we wrote a line of application code, we redesigned their client-facing report. We used Figma Make to move fast — not static mocks, not a wired-together prototype, but something that behaved like a real product. This proved unexpectedly valuable.
+
+As the client put it: it allowed us to explore a whole space of interactions that would not have been apparent from static mocks. We could sit down together with something that responded and clicked through, gather high-fidelity feedback at an early stage, and use it as the foundation for the codebase when we moved into build. The facelift also gave Aire Spaces an updated version of the document they were already sharing with clients — an immediate, tangible improvement before the application was anywhere near done.
+
+</Stage>
+
+<Stage label="Persistence" heading="Supabase: auth, history, and a light client portal">
+
+For user access, we reached for Supabase. Fast to spin up, a migrations-based schema, and a row-level security layer that meant clients did not need to receive a link in an email each month — they got a login to a portal where their reports lived. The time to ship this was minimal relative to the value it added.
+
+Supabase also became the persistence layer for report history. Month after month, data accumulated without anyone having to manage it. Historical views built themselves. The scope naturally extended into a light client management interface — adding clients, assigning properties, controlling access — but we kept it tight and shipped it without letting it sprawl.
+
+<InlineNote>
+Supabase — fast to wire up, RLS for access control, and a clean persistence layer for historical data. A strong, malleable component. A recurring part of how we build.
+</InlineNote>
+
+<ArchDiagram />
+
+</Stage>

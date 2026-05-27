@@ -1,0 +1,33 @@
+---
+title: "Reconciliation Agent"
+summary: "Rather than build a full bank reconciliation UI — which would have ballooned with edge cases — we explored an agent-based approach. A lightweight composable tool that handles the judgment-heavy parts of reconciliation without a complex interface."
+type: "experiment"
+stage: "Experiment"
+ctaLabel: "Read experiment notes →"
+date: 2026-02-01
+tags: ["Agent", "Reconciliation"]
+services:
+  - 02-fixing-brittle-internal-systems
+outcomes:
+  - title: "A smarter scope decision"
+    description: "Choosing not to build the bank feed saved months of work on something that would have added complexity rather than clarity. The experiment with the Reconciliation Agent pointed toward a better path."
+---
+
+import Quote from "@components/case-study/Quote.astro";
+import InlineNote from "@components/case-study/InlineNote.astro";
+
+## When the obvious next step is the wrong one.
+
+The natural extension of the integration work pointed toward a bank feed — automatically reconciling income data against actual payments, removing the last manual thread from the reporting cycle. We scoped it. And we decided not to build it.
+
+Bank feed integrations for custom-built projects carry a level of compliance overhead that sits well outside the scope of a reporting tool. More importantly, the reconciliation UI required to communicate what an automated process has done — the edge cases, the mismatches, the exceptions — would have taken the project somewhere neither of us wanted it to go. We would have spent months building something that made the process more complicated to audit, not less.
+
+Instead, we experimented with something smaller and more interesting. As we had started building AI-powered tools internally, we saw a different kind of opportunity — not a full automated reconciliation pipeline, but an agent-based approach that could handle the messy, judgment-heavy parts of reconciliation without requiring a complex UI to surface it. We built a Reconciliation Agent as an internal experiment: a lightweight, composable tool that could do meaningful lifting in a fraction of the time.
+
+<Quote attribution="Codemyriad on the Aire Spaces engagement" accent="amber">
+  "It was not just about using agents to get work done smarter. It was about finding ways to get something valuable into the client's hands quickly — something that would have taken months to build properly as a traditional UI."
+</Quote>
+
+<InlineNote>
+The Reconciliation Agent is an ongoing internal experiment. A write-up is in progress.
+</InlineNote>

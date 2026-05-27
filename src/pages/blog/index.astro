@@ -12,13 +12,17 @@ const posts = (await getCollection("blog"))
 
 ---
 
-<PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
+<PageLayout
+  title={BLOG.TITLE}
+  description={BLOG.DESCRIPTION}
+  breadcrumb={[{ label: "Blog" }]}
+>
   <Container>
-    <div class="space-y-10">
+    <div class="space-y-10 max-w-screen-lg mx-auto">
       <h1 data-typeout class="text-6xl font-bold text-white">Blog</h1>
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {
-          posts.map((post, index) => (
+          posts.map((post) => (
             <BlogCard
               href={`/blog/${post.slug}`}
               title={post.data.title}

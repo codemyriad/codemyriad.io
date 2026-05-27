@@ -1,0 +1,84 @@
+---
+// Global keyboard-shortcut handler. Scans the page for `[data-shortcut]`
+// elements (rendered by KbdChip) and clicks the nearest `<a>` or `<button>`
+// ancestor when the user types matching keys. The trim-from-left buffer means
+// typos like `xair` still resolve to `AIR`.
+---
+
+<script>
+  const init = () => {
+    const chips = document.querySelectorAll<HTMLElement>("[data-shortcut]");
+    if (!chips.length) return;
+
+    // Reserved keys handled by dedicated listeners elsewhere (menu toggle, etc).
+    const RESERVED = new Set(["M"]);
+
+    const map = new Map<string, HTMLElement>();
+    chips.forEach((chip) => {
+      const keys = chip.dataset.shortcut?.toUpperCase();
+      if (!keys || RESERVED.has(keys)) return;
+      const target = chip.closest<HTMLElement>("a, button");
+      if (!target || map.has(keys)) return;
+      map.set(keys, target);
+    });
+    if (!map.size) return;
+
+    const prefixes = new Set<string>();
+    for (const keys of map.keys()) {
+      for (let i = 1; i <= keys.length; i++) prefixes.add(keys.slice(0, i));
+    }
+
+    let buffer = "";
+    let timer: number | null = null;
+    const reset = () => {
+      buffer = "";
+      if (timer) clearTimeout(timer);
+      timer = null;
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key.length !== 1) return;
+      const t = e.target as Element | null;
+      if (
+        t &&
+        t.closest &&
+        t.closest(
+          'input, textarea, select, [contenteditable=""], [contenteditable="true"]'
+        )
+      ) {
+        return;
+      }
+      // Backtick and tilde live on the same physical key — accept either so
+      // the `~` shortcut doesn't force a Shift press. Same for `/` and `?`
+      // (the shortcut-guide key).
+      const ch =
+        e.key === "`" ? "~" : e.key === "/" ? "?" : e.key.toUpperCase();
+      if (!/[A-Z0-9~?]/.test(ch)) return;
+
+      let next = buffer + ch;
+      while (next.length && !prefixes.has(next)) next = next.slice(1);
+      buffer = next;
+
+      const target = map.get(buffer);
+      if (target) {
+        reset();
+        target.click();
+        return;
+      }
+
+      if (timer) clearTimeout(timer);
+      timer = window.setTimeout(reset, 1200);
+    };
+
+    document.addEventListener("keydown", onKey);
+    document.addEventListener(
+      "astro:before-swap",
+      () => document.removeEventListener("keydown", onKey),
+      { once: true }
+    );
+  };
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>

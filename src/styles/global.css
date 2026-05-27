@@ -8,6 +8,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Ensure the `hidden` HTML attribute beats display utilities like `flex`. */
+[hidden] {
+  display: none !important;
+}
+
 section[id] {
   scroll-margin-top: 96px;
 }
@@ -23,10 +28,31 @@ body {
   @apply bg-[#0A0A0A] text-[#FAFAFA]/75;
 }
 
-header {
-  @apply fixed top-0 left-0 right-0 z-50 py-5;
+body > header {
+  @apply fixed top-0 left-0 right-0 z-50 py-4;
+}
+
+/* Persisted blur+tint layer that sits behind the header. Lives outside the
+   view-transition snapshot of the header so the backdrop-filter never goes
+   stale during navigations. Sized to the live header via JS so it tracks
+   wraps (e.g. when the breadcrumb pushes the nav to a second line). */
+.site-nav-backdrop {
+  @apply fixed top-0 left-0 right-0 z-40 pointer-events-none;
+  height: var(--site-nav-height, 4.5rem);
   @apply bg-[#0A0A0A]/70;
   @apply backdrop-blur-md saturate-200;
+}
+
+/* Persisted logo overlay. Same trick as the backdrop: lives outside the
+   header's view-transition snapshot so it never re-renders or flickers
+   during navigations. Positioned to align with the header's flex layout. */
+.site-nav-logo {
+  @apply fixed top-4 left-0 right-0 z-[51] pointer-events-none;
+}
+.site-nav-logo > * {
+  /* The inner Container itself shouldn't catch clicks; only the logo link
+     inside should, courtesy of pointer-events-auto on the <Link>. */
+  pointer-events: none;
 }
 
 main {
@@ -86,6 +112,95 @@ article {
 
 .fade-up.visible {
   animation: fade-up-in 0.3s ease-out 0.3s forwards;
+}
+
+/* Whole-page fade-in entrance — applied at the page-content wrapper level
+   (e.g. /projects and /projects/[project]). Runs once on initial mount. */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade-in {
+  animation: page-fade-in 320ms ease-out;
+}
+
+/* Sequential page-to-page transition (overrides Astro's default cross-fade):
+   old page fades out completely, then new page fades in.
+   Gives a "clean page" feel rather than two pages overlapping. */
+::view-transition-old(root) {
+  animation: vt-fade-out 200ms ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 320ms ease-out 200ms both;
+}
+@keyframes vt-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Keep the site nav (header) constant across page transitions — no fade.
+   The element itself is `transition:persist`ed (survives in DOM); these rules
+   also suppress the default browser cross-fade on its view-transition snapshots. */
+::view-transition-group(site-nav) {
+  animation: none !important;
+}
+::view-transition-old(site-nav) {
+  animation: none !important;
+  display: none;
+}
+::view-transition-new(site-nav) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Same treatment for the persisted backdrop and logo overlays — they live
+   outside the header's snapshot so they can stay live across navigations,
+   but we still have to silence the root fade-in/out for their snapshots. */
+::view-transition-group(site-nav-backdrop),
+::view-transition-group(site-nav-logo) {
+  animation: none !important;
+}
+
+/* Backdrop: hide the old snapshot, show the new immediately. Its height can
+   change between pages (e.g. breadcrumb on/off), so overlapping both would
+   briefly double-stack. */
+::view-transition-old(site-nav-backdrop) {
+  animation: none !important;
+  display: none;
+}
+::view-transition-new(site-nav-backdrop) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Logo: keep BOTH snapshots visible at full opacity. The logo doesn't change
+   between pages, so the snapshots are visually identical — overlapping them
+   eliminates the brief gap that `display: none` on the old snapshot can
+   leave between snapshot hide and live element show, which read as a flicker
+   on backward navigation. */
+::view-transition-old(site-nav-logo),
+::view-transition-new(site-nav-logo) {
+  animation: none !important;
+  opacity: 1 !important;
 }
 
 html #back-to-top {

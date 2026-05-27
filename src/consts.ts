@@ -23,6 +23,12 @@ export const PROJECTS: Metadata = {
     "A collection of things we have worked on recently, with links to repositories and demos.",
 };
 
+export const SERVICES: Metadata = {
+  TITLE: "Services",
+  DESCRIPTION:
+    "What we do — internal tools, reporting, automation, client portals.",
+};
+
 export const LINKS: Links = [
   {
     NAME: "discourse",

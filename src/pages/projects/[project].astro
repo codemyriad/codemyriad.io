@@ -1,0 +1,339 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import Container from "@components/Container.astro";
+import ContactSection from "@components/ContactSection.astro";
+import WindowManagerScript from "@components/case-study/WindowManagerScript.astro";
+import TerminalWindow from "@components/case-study/TerminalWindow.astro";
+import CaseStudyContent from "@components/case-study/CaseStudyContent.astro";
+import ComponentsReference from "@components/case-study/ComponentsReference.astro";
+import KbdChip from "@components/KbdChip.astro";
+
+export async function getStaticPaths() {
+  const projects = (await getCollection("projects"))
+    .filter((p) => !p.data.draft);
+  return projects.map((project) => ({
+    params: { project: project.slug.replace(/\/index$/, "").split("/")[0] },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await project.render();
+const projectSlug = project.slug.replace(/\/index$/, "").split("/")[0];
+
+const allCaseStudies = await getCollection("case-studies");
+const caseStudies = allCaseStudies.filter((cs) => {
+  if (cs.data.draft) return false;
+  // Slugs are e.g. "03-aire-spaces/property-rental-reports"
+  return cs.slug.startsWith(`${projectSlug}/`);
+});
+
+// Order: manual via project.caseStudyOrder, else by date descending
+const order = project.data.caseStudyOrder ?? [];
+const studySlug = (cs: CollectionEntry<"case-studies">) =>
+  cs.slug.split("/").slice(1).join("/");
+
+const sortedStudies = [...caseStudies].sort((a, b) => {
+  const aSlug = studySlug(a);
+  const bSlug = studySlug(b);
+  const ai = order.indexOf(aSlug);
+  const bi = order.indexOf(bSlug);
+  if (ai !== -1 && bi !== -1) return ai - bi;
+  if (ai !== -1) return -1;
+  if (bi !== -1) return 1;
+  return b.data.date.valueOf() - a.data.date.valueOf();
+});
+
+const client = project.data.client ?? project.data.title;
+
+// Meta-grid rows. `value` is either a string (single value, optionally a
+// link), or a string[] (rendered as a row of tag pills — currently used for
+// Services so the work-type tags keep their pill look from the old hero).
+type MetaRow = { label: string; value: string | string[]; href?: string };
+const META_ROWS: MetaRow[] = [
+  project.data.website && {
+    label: "Website",
+    value: project.data.website,
+    href: project.data.website,
+  },
+  project.data.industry && { label: "Industry", value: project.data.industry },
+  project.data.tags && project.data.tags.length > 0 && {
+    label: "Services",
+    value: project.data.tags,
+  },
+].filter(Boolean) as MetaRow[];
+
+const defaultCta = (cs: CollectionEntry<"case-studies">) => {
+  if (cs.data.ctaLabel) return cs.data.ctaLabel.replace(/\s*→\s*$/, "");
+  if (cs.data.type === "experiment") return "Read experiment notes";
+  return "Read case study";
+};
+
+// Number-key shortcuts for case studies. Skip non-clickable ones (nothing to
+// open). Pad to 2 digits once the count crosses 10, so `1` doesn't ambiguously
+// prefix `10`.
+const clickableStudies = sortedStudies.filter((cs) => cs.data.writeUp !== false);
+const studyShortcutPad = clickableStudies.length >= 10 ? 2 : 1;
+const studyShortcuts = new Map<string, string>();
+clickableStudies.forEach((cs, idx) => {
+  studyShortcuts.set(cs.slug, String(idx + 1).padStart(studyShortcutPad, "0"));
+});
+---
+
+<PageLayout
+  title={`${client} — Project`}
+  description={project.data.summary ?? project.data.description}
+  breadcrumb={[
+    { label: "Projects", href: "/projects" },
+    { label: client },
+  ]}
+>
+  <Container>
+    <div class="page-fade-in space-y-12 max-w-screen-lg mx-auto">
+      <!-- Project Hero — two columns from md+. Left: name, tagline, the
+           full description (MDX body). Right: condensed metadata block,
+           including Services (derived from the project's tags). All
+           context sits above the case-study list. -->
+      <section class="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-10 md:gap-12 items-start">
+        <div class="space-y-6">
+          <div class="space-y-3">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-[#FAFAFA]">
+              {client}
+            </h1>
+          </div>
+          {project.body.trim().length > 0 && (
+            <article class="prose prose-invert max-w-none text-base">
+              <Content />
+            </article>
+          )}
+        </div>
+
+        {META_ROWS.length > 0 && (
+          <aside class="border border-white/10 divide-y divide-white/10 self-start">
+            {META_ROWS.map((row) => (
+              <div class="flex justify-between items-start px-4 py-3 gap-4">
+                <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 shrink-0 pt-0.5">
+                  {row.label}
+                </span>
+                {Array.isArray(row.value) ? (
+                  <div class="flex flex-wrap gap-1.5 justify-end">
+                    {row.value.map((tag) => (
+                      <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : row.href ? (
+                  <a
+                    href={row.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="text-xs text-[#7EC7FF] hover:text-[#7EC7FF]/80 truncate text-right"
+                  >
+                    {row.value.replace(/^https?:\/\//, "")}
+                  </a>
+                ) : (
+                  <span class="text-xs text-body text-right">{row.value}</span>
+                )}
+              </div>
+            ))}
+          </aside>
+        )}
+      </section>
+
+      {sortedStudies.length > 0 && (
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <span class="text-xs uppercase tracking-[0.2em] text-[#FAFAFA]/40">Case Studies</span>
+          </div>
+          <ul class="list-none p-0">
+            {sortedStudies.map((cs) => {
+              const slug = studySlug(cs);
+              const accent = cs.data.type === "experiment" ? "#F4915C" : "#7EC7FF";
+              const canonical = `/projects/${projectSlug}/${slug}`;
+              const interactive = cs.data.writeUp !== false;
+              return (
+                <li
+                  class={`case-study-card group relative flex items-start w-full border border-white/10 bg-white/5 transition duration-180 ease-in-out mb-4 overflow-clip ${interactive ? "hover:bg-white/10" : ""}`}
+                >
+                  {cs.data.writeUp !== false ? (
+                    <a
+                      href={canonical}
+                      data-case-study-card={slug}
+                      class="relative flex flex-col md:flex-row items-start w-full pl-4 pr-8 py-4 gap-6 no-underline text-inherit"
+                      aria-label={`${cs.data.title} — ${defaultCta(cs).replace(/\s*→\s*$/, "")}`}
+                    >
+                      {studyShortcuts.has(cs.slug) && (
+                        <KbdChip
+                          keys={studyShortcuts.get(cs.slug)!}
+                          class="absolute top-3 right-3 z-20"
+                        />
+                      )}
+                      <!-- Title + description -->
+                      <div class="flex-grow space-y-3 min-w-0">
+                        <div class="flex flex-wrap items-center gap-3">
+                          <h3
+                            class="text-lg font-bold text-[#FAFAFA]"
+                            style={`text-decoration-color: ${accent};`}
+                          >
+                            {cs.data.title}
+                          </h3>
+                          {cs.data.tags && cs.data.tags.length > 0 && cs.data.tags.map((tag: string) => (
+                            <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <p class="text-sm leading-relaxed text-body max-w-2xl">
+                          {cs.data.summary}
+                        </p>
+                      </div>
+
+                      <!-- CTA cue (decorative — the whole card is the link).
+                           Pulsing status dot is inline before the CTA text. -->
+                      <div class="shrink-0 pt-1 md:text-right" aria-hidden="true">
+                        <span
+                          class="text-xs font-mono inline-flex items-center gap-2.5"
+                          style={`color: ${accent};`}
+                        >
+                          <span class="relative inline-block w-2 h-2 shrink-0">
+                            <span
+                              class="absolute -inset-0.5 animate-ping opacity-60 rounded-full"
+                              style={`background: ${accent};`}
+                            ></span>
+                            <span
+                              class="relative block w-2 h-2 rounded-full"
+                              style={`background: ${accent};`}
+                            ></span>
+                          </span>
+                          <span class="group-hover:underline underline-offset-4">
+                            {defaultCta(cs)}
+                          </span>
+                        </span>
+                      </div>
+                    </a>
+                  ) : (
+                    <div class="flex flex-col md:flex-row items-start w-full px-4 py-4 gap-6">
+                      <!-- Title + description -->
+                      <div class="flex-grow space-y-3 min-w-0">
+                        <div class="flex flex-wrap items-center gap-3">
+                          <h3 class="text-lg font-bold text-[#FAFAFA]">{cs.data.title}</h3>
+                          {cs.data.tags && cs.data.tags.length > 0 && cs.data.tags.map((tag: string) => (
+                            <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <p class="text-sm leading-relaxed text-body max-w-2xl">
+                          {cs.data.summary}
+                        </p>
+                      </div>
+
+                      <!-- Non-clickable status note (no pulsing dot — this
+                           card isn't "live" yet). -->
+                      <div class="shrink-0 pt-1 md:text-right">
+                        <span class="text-xs text-[#FAFAFA]/40 italic">
+                          {cs.data.ctaLabel ?? "In progress"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <ContactSection />
+    </div>
+  </Container>
+
+  <!-- Hidden case-study windows (rendered server-side, opened by JS).
+       Each case study is rendered inside a TerminalWindow with derived
+       chrome props (accent + filename from the case-study's `type` and
+       slug). Inlined here since the project page is the only caller. -->
+  {sortedStudies
+    .filter((cs) => cs.data.writeUp !== false)
+    .map((cs) => {
+      const slug = studySlug(cs);
+      const studyWindowSlug = cs.slug.split("/").slice(-1)[0];
+      const accent = cs.data.type === "experiment" ? "#F4915C" : "#7EC7FF";
+      const accentDim = cs.data.type === "experiment" ? "#5a3a22" : "#2a4a6a";
+      const filename = `${studyWindowSlug.replace(/-/g, "_")}.log`;
+      const statusLabel =
+        cs.data.type === "experiment" ? "EXPERIMENT" : "SHIPPED";
+      const width = cs.data.window?.width ?? 720;
+      const height = cs.data.window?.height ?? 480;
+      return (
+        <TerminalWindow
+          slug={studyWindowSlug}
+          accent={accent}
+          accentDim={accentDim}
+          filename={filename}
+          popoutHref={`/projects/${projectSlug}/${slug}`}
+          width={width}
+          height={height}
+          statusLabel={statusLabel}
+          windowType={cs.data.type}
+        >
+          <CaseStudyContent entry={cs} showHeader={true} fullPage={false} />
+        </TerminalWindow>
+      );
+    })}
+
+  <!-- Internal: components reference window (Cmd+Shift+K). Not surfaced in
+       the UI; lives on project pages so it can be inspected next to the
+       real thing during refinement. -->
+  <TerminalWindow
+    slug="components-reference"
+    accent="#C792EA"
+    accentDim="#4a2e6a"
+    filename="components_reference.log"
+    popoutHref="/lab/case-study-components"
+    prompt="ls ./case-study-components/"
+    width={820}
+    height={600}
+    statusLabel="REFERENCE"
+    statusLeft="STATUS: INTERNAL"
+  >
+    <ComponentsReference />
+  </TerminalWindow>
+
+  <WindowManagerScript />
+</PageLayout>
+
+<style>
+  /* Subtle CRT-style scanlines on each case-study card. Sits behind the
+     content, intensifies on hover, scrolls slowly to feel alive — same
+     pattern as the .project-card scanlines on the /projects index. */
+  .case-study-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 3px,
+      rgba(255, 255, 255, 0.025) 3px,
+      rgba(255, 255, 255, 0.025) 4px
+    );
+    opacity: 0.5;
+    transition: opacity 300ms ease;
+  }
+  .case-study-card:hover::after {
+    opacity: 1;
+    animation: case-study-scan 6s linear infinite;
+  }
+  @keyframes case-study-scan {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 4px;
+    }
+  }
+</style>

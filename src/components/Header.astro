@@ -1,31 +1,730 @@
 ---
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
+import KbdChip from "@components/KbdChip.astro";
 import { SITE } from "@consts";
+import { ChevronRight } from "@lucide/astro";
+import type { BreadcrumbItem } from "@types";
 
-const isHome = Astro.url.pathname === "/";
-const navHref = (hash: string) => (isHome ? hash : `/${hash}`);
+interface Props {
+  breadcrumb?: BreadcrumbItem[];
+}
+
+const { breadcrumb = [] } = Astro.props;
+
+// Always prefix with `/` so anchors work from any page.
+const navHref = (hash: string) => `/${hash}`;
+
+// First letter of each non-terminal crumb becomes a keyboard shortcut. `M` is
+// reserved for the menu toggle; dedup within the breadcrumb by stepping into
+// the label until a unique letter is found.
+const RESERVED_KEYS = new Set(["M"]);
+const breadcrumbShortcuts = new Map<number, string>();
+{
+  const used = new Set<string>();
+  breadcrumb.forEach((item, i) => {
+    if (!item.href || i === breadcrumb.length - 1) return;
+    const letters = (item.label ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    let offset = 0;
+    let key = letters.charAt(offset);
+    while (key && (used.has(key) || RESERVED_KEYS.has(key))) {
+      key = letters.charAt(++offset);
+    }
+    if (key) {
+      breadcrumbShortcuts.set(i, key);
+      used.add(key);
+    }
+  });
+}
 ---
 
-<header>
+<!-- Persisted backdrop layer. View-transition snapshots replace the live
+     header with a flat image briefly, which kills `backdrop-filter` (it has
+     no live content to blur). Keeping the blur layer as a persisted sibling
+     means the live blur stays active through every navigation. -->
+<div
+  class="site-nav-backdrop"
+  aria-hidden="true"
+  transition:persist="site-nav-backdrop"
+  transition:name="site-nav-backdrop"
+></div>
+
+<!-- Logo overlay. Lifted out of the header's view-transition snapshot so it
+     can get its own no-animation rules and never fade with the root. We
+     deliberately do NOT `transition:persist` it — Astro's persist detaches
+     and reattaches the live element across the swap, and that detach can
+     leave a single-frame flicker on a fixed-positioned element. The image
+     is eager-loaded and identical on every page, so re-rendering it each
+     nav is effectively free. The header keeps an invisible placeholder of
+     the same dimensions to preserve the flex layout. -->
+<div class="site-nav-logo" transition:name="site-nav-logo">
   <Container>
-    <div class="flex flex-wrap items-center gap-y-3 justify-between">
-      <Link href="/" underline={false}>
+    <Link
+      href="/"
+      underline={false}
+      class="inline-block pointer-events-auto"
+    >
+      <img
+        src="/logo.svg"
+        alt={`${SITE.NAME} logo`}
+        width="129"
+        height="24"
+        class="h-6 w-auto"
+        loading="eager"
+      />
+    </Link>
+  </Container>
+</div>
+
+<header transition:name="site-nav">
+  <Container>
+    <!-- Layout: logo (col 1, always row 1) · breadcrumb (col 2/row 1 on sm+,
+         full-width row 2 on mobile) · nav/menu (col 3, always row 1). One
+         flex row with `flex-wrap`; the breadcrumb's `w-full sm:w-auto`
+         forces a wrap below on mobile only. -->
+    <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2">
+      <span class="order-1 inline-block shrink-0" aria-hidden="true">
         <img
           src="/logo.svg"
-          alt={`${SITE.NAME} logo`}
-          class="h-7 w-auto"
+          alt=""
+          width="129"
+          height="24"
+          class="h-6 w-auto invisible"
           loading="eager"
         />
-      </Link>
+      </span>
+      <!-- Desktop nav (sm+) -->
       <nav
-        class="flex flex-wrap items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
+        class="hidden order-2 md:order-3 ml-auto items-center gap-5 text-xs sm:text-sm text-[#FAFAFA]/60"
       >
-        <Link href={navHref("#services")} underline={false}>Services</Link>
-        <Link href={navHref("#projects")} underline={false}>Projects</Link>
-        <Link href={navHref("#blog")} underline={false}>Blog</Link>
+        <Link href="/services" underline={false}>Services</Link>
+        <Link href="/projects" underline={false}>Projects</Link>
+        <Link href="/blog" underline={false}>Blog</Link>
         <Link href={navHref("#contact")} underline={false}>Contact</Link>
+      </nav>
+
+      <!-- Mobile menu toggle (below sm) + anchored dropdown. The wrapper is
+           `relative` so the dropdown can absolutely position to its
+           bottom-right edge. -->
+      <div class="relative order-2 sm:order-3 ml-auto">
+        <button
+          type="button"
+          class="group inline-flex items-center gap-2 text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/60 hover:text-[#FAFAFA] transition-colors"
+          aria-label="Toggle menu (M)"
+          aria-keyshortcuts="M"
+          aria-controls="site-nav-menu"
+          aria-expanded="false"
+          data-menu-toggle
+        >
+          <span>MENU</span>
+          <KbdChip keys="M" />
+        </button>
+
+        <!-- Dropdown panel, anchored to the button's bottom-right. -->
+        <div
+          id="site-nav-menu"
+          data-menu-panel
+          data-open="false"
+          aria-hidden="true"
+          class:list={[
+            "absolute top-full right-0 mt-2 min-w-44 z-50 p-1",
+            "bg-[#212121] border border-white/20 shadow-[0_12px_28px_rgba(0,0,0,0.45)]",
+            "backdrop-blur-md saturate-200",
+            "-translate-y-2 opacity-0 pointer-events-none",
+            "transition-[transform,opacity] duration-150 ease-out",
+            "motion-reduce:transition-opacity motion-reduce:transform-none",
+            "data-[open=true]:translate-y-0 data-[open=true]:opacity-100 data-[open=true]:pointer-events-auto",
+          ]}
+        >
+          <nav aria-label="Site menu" class="flex flex-col">
+            {[
+              { label: "Services", href: "/services", key: "S" },
+              { label: "Projects", href: "/projects", key: "P" },
+              { label: "Blog", href: "/blog", key: "B" },
+              { label: "Contact", href: navHref("#contact"), key: "C" },
+            ].map((item) => (
+              <a
+                href={item.href}
+                data-menu-link
+                data-pressed="false"
+                aria-keyshortcuts={item.key}
+                class:list={[
+                  "relative flex items-center justify-between gap-3 py-2 pl-5 pr-2",
+                  "text-[11px] uppercase tracking-[0.15em] text-[#FAFAFA]/60 no-underline",
+                  "transition-colors duration-100",
+                  "before:content-['>'] before:absolute before:left-2 before:top-1/2 before:-translate-y-1/2",
+                  "before:text-[#FAFAFA] before:opacity-0 before:transition-opacity before:duration-100",
+                  "hover:bg-white/10 hover:text-[#FAFAFA] hover:before:opacity-90",
+                  "focus-visible:bg-white/5 focus-visible:text-[#FAFAFA] focus-visible:outline-none focus-visible:before:opacity-90",
+                  "active:bg-white/[0.12] active:text-[#FAFAFA] active:before:opacity-100",
+                  "data-[pressed=true]:bg-white/[0.12] data-[pressed=true]:text-[#FAFAFA] data-[pressed=true]:before:opacity-100",
+                ]}
+              >
+                <span>{item.label}</span>
+                <KbdChip keys={item.key} />
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      <!-- Breadcrumb. order-3 + w-full on mobile forces it to wrap onto a
+           new row below the logo/menu line; sm:order-2 + sm:w-auto puts it
+           back inline between the logo and the nav from `sm` onwards (so it
+           shares the top row with the [MENU] button in the sm-md range, and
+           with the desktop nav from md upwards). -->
+      <nav
+        class:list={[
+          "terminal-breadcrumb",
+          "order-3 sm:order-2",
+          "w-full sm:w-auto",
+          "flex items-center gap-2 min-w-0",
+          "text-xs leading-none uppercase tracking-widest text-[#FAFAFA]/40",
+        ]}
+        aria-label="Breadcrumb"
+        data-terminal-root
+        data-terminal-state="idle"
+      >
+        <a
+          href="/"
+          class="text-[#FAFAFA]/40 hover:text-[#FAFAFA] transition-colors shrink-0"
+          data-shortcut="~"
+          aria-label="Home"
+          aria-keyshortcuts="~"
+        >~</a>
+        {breadcrumb.map((item, i) => {
+            const isLast = i === breadcrumb.length - 1;
+            return (
+              <span
+                class="flex items-center gap-2 min-w-0"
+                data-crumb-segment
+                data-crumb-index={i}
+              >
+                {i > 0 && <ChevronRight size={10} class="shrink-0" />}
+                {item.href && !isLast ? (
+                  <a
+                    href={item.href}
+                    class="hover:text-[#FAFAFA] transition-colors truncate inline-flex items-center gap-1.5"
+                    aria-label={item.label}
+                  >
+                    <span data-terminal-text={item.label}>{item.label}</span>
+                    {breadcrumbShortcuts.has(i) && (
+                      <KbdChip keys={breadcrumbShortcuts.get(i)!} />
+                    )}
+                  </a>
+                ) : (
+                  <span class="text-[#FAFAFA] truncate" aria-label={item.label}>
+                    <span data-terminal-text={item.label}>{item.label}</span>
+                  </span>
+                )}
+              </span>
+            );
+          })}
+        <span
+          aria-hidden="true"
+          data-terminal-cursor
+          class="terminal-cursor"
+        ></span>
       </nav>
     </div>
   </Container>
 </header>
+
+<style is:global>
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.95em;
+    background: #fafafa;
+    vertical-align: -0.1em;
+    margin-left: 1px;
+    opacity: 0;
+    flex-shrink: 0;
+  }
+  .terminal-breadcrumb[data-terminal-state="typing"] .terminal-cursor {
+    opacity: 1;
+  }
+  .terminal-breadcrumb[data-terminal-state="idle"] .terminal-cursor {
+    animation: terminal-blink 1s steps(1, end) infinite;
+  }
+  .terminal-breadcrumb[data-terminal-state="done"] .terminal-cursor {
+    opacity: 0;
+  }
+  @keyframes terminal-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Hide the breadcrumb cursor while the mobile menu is open — the dropdown
+     is intentionally translucent, and the cursor blinking behind it shows
+     through as a flashing box at the top of the panel. */
+  body:has([data-menu-panel][data-open="true"]) .terminal-cursor {
+    opacity: 0 !important;
+    animation: none !important;
+  }
+
+  /* Locked to full opacity through the exit animation, so the clicked link
+     (or any crumb that's about to become terminal on the next page) doesn't
+     flash from dim to bright when the swap happens. !important defeats the
+     inherited rgba color on the parent breadcrumb nav. */
+  .terminal-breadcrumb .terminal-crumb-active,
+  .terminal-breadcrumb .terminal-crumb-active:hover {
+    color: #fafafa !important;
+  }
+
+  /* Just-demoted crumb (was terminal/white, now middle/dim). Color snaps
+     instantly; the chip beside it gets a brief 25ms fade so it doesn't
+     look hard-cut. Cleanup of the attribute waits for the chip animation
+     (the longer of the two). */
+  .terminal-breadcrumb a[data-just-demoted] {
+    animation: crumb-demote 0ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes crumb-demote {
+    from {
+      color: #fafafa;
+    }
+    to {
+      color: rgba(250, 250, 250, 0.4);
+    }
+  }
+  .terminal-breadcrumb a[data-just-demoted] [data-shortcut] {
+    animation: chip-fade-in 25ms ease;
+  }
+  @keyframes chip-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Crumb shortcut chips fade in the moment THEIR crumb finishes typing, not
+     when the whole breadcrumb is done. Pre-filled crumbs (kept from the
+     previous page's shared prefix) and just-typed crumbs both count as
+     "ready," so each chip appears in step with its own crumb. */
+  .terminal-breadcrumb [data-crumb-segment] [data-shortcut] {
+    opacity: 1;
+    transition: opacity 200ms ease;
+  }
+  .terminal-breadcrumb[data-terminal-state="typing"]
+    [data-crumb-segment]
+    a:has(
+      [data-terminal-text]:not([data-terminal-prefilled]):not([data-terminal-typed])
+    )
+    [data-shortcut] {
+    opacity: 0;
+    transition: opacity 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-cursor {
+      display: none !important;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    // Hard cap so navigation never feels sluggish, even on long crumbs.
+    var EXIT_MAX_MS = 280;
+    var TYPE_MIN_MS = 22;
+    var TYPE_RAND_MS = 18;
+    var TYPE_GAP_BETWEEN_CRUMBS_MS = 90;
+    var DELETE_MIN_MS = 14;
+    var DELETE_GAP_BETWEEN_CRUMBS_MS = 35;
+
+    function reduceMotion() {
+      return (
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      );
+    }
+
+    function readCrumbs(scope) {
+      return Array.prototype.slice
+        .call(scope.querySelectorAll("[data-terminal-text]"))
+        .map(function (el) {
+          return el.getAttribute("data-terminal-text") || "";
+        });
+    }
+
+    // Position-wise common prefix length.
+    function commonPrefixLen(oldCrumbs, newCrumbs) {
+      var n = Math.min(oldCrumbs.length, newCrumbs.length);
+      var i = 0;
+      while (i < n && oldCrumbs[i] === newCrumbs[i]) i++;
+      return i;
+    }
+
+    function placeCursorAt(root, anchor) {
+      var cursor = root.querySelector("[data-terminal-cursor]");
+      if (!cursor) return;
+      if (anchor && anchor.parentNode) {
+        anchor.parentNode.appendChild(cursor);
+      } else {
+        root.appendChild(cursor);
+      }
+    }
+
+    function typeBreadcrumb() {
+      var root = document.querySelector("[data-terminal-root]");
+      if (!root) return;
+
+      var targets = Array.prototype.slice.call(
+        root.querySelectorAll("[data-terminal-text]")
+      );
+      if (targets.length === 0) return;
+
+      if (reduceMotion()) {
+        targets.forEach(function (t) {
+          t.textContent = t.getAttribute("data-terminal-text") || "";
+          t.setAttribute("data-terminal-typed", "1");
+        });
+        root.setAttribute("data-terminal-state", "done");
+        return;
+      }
+
+      // Reset only targets NOT marked as pre-filled. Pre-filled crumbs were
+      // inherited from the previous page's common prefix and are already
+      // showing the correct text — leave them alone.
+      targets.forEach(function (t) {
+        if (!t.hasAttribute("data-terminal-prefilled")) {
+          t.textContent = "";
+          t.removeAttribute("data-terminal-typed");
+        }
+      });
+      root.setAttribute("data-terminal-state", "typing");
+
+      var i = 0;
+      function typeNext() {
+        if (i >= targets.length) {
+          root.setAttribute("data-terminal-state", "idle");
+          if (targets.length > 0) placeCursorAt(root, targets[targets.length - 1]);
+          return;
+        }
+        var el = targets[i];
+        // Skip crumbs that were pre-filled with their final text.
+        if (el.hasAttribute("data-terminal-prefilled")) {
+          i++;
+          setTimeout(typeNext, 0);
+          return;
+        }
+        var text = el.getAttribute("data-terminal-text") || "";
+        placeCursorAt(root, el);
+        var pos = 0;
+        function typeChar() {
+          if (pos >= text.length) {
+            el.setAttribute("data-terminal-typed", "1");
+            i++;
+            setTimeout(typeNext, TYPE_GAP_BETWEEN_CRUMBS_MS);
+            return;
+          }
+          el.textContent += text.charAt(pos++);
+          setTimeout(typeChar, TYPE_MIN_MS + Math.random() * TYPE_RAND_MS);
+        }
+        typeChar();
+      }
+      typeNext();
+    }
+
+    // Backspace from `keep` (number of crumbs to leave intact) to the end of
+    // the live breadcrumb. If `hideTrailing` is true, the segment wrapper
+    // (chevron + crumb) is hidden once its text empties, so no orphan chevron
+    // lingers before the page swap.
+    function backspaceFrom(keep, hideTrailing) {
+      return new Promise(function (resolve) {
+        var root = document.querySelector("[data-terminal-root]");
+        if (!root) return resolve();
+
+        var allTargets = Array.prototype.slice.call(
+          root.querySelectorAll("[data-terminal-text]")
+        );
+        var toClear = allTargets.slice(keep);
+        if (toClear.length === 0) return resolve();
+
+        if (reduceMotion()) {
+          toClear.forEach(function (el) {
+            el.textContent = "";
+            if (hideTrailing) {
+              var seg = el.closest("[data-crumb-segment]");
+              if (seg) seg.style.display = "none";
+            }
+          });
+          return resolve();
+        }
+
+        // Right-to-left: drain the deepest crumb first.
+        var queue = toClear.slice().reverse();
+
+        // Step time scaled so total fits in EXIT_MAX_MS.
+        var totalChars = queue.reduce(function (n, el) {
+          return n + (el.textContent || "").length;
+        }, 0);
+        var stepMs =
+          totalChars > 0
+            ? Math.max(4, Math.min(DELETE_MIN_MS, EXIT_MAX_MS / totalChars))
+            : DELETE_MIN_MS;
+
+        root.setAttribute("data-terminal-state", "typing");
+
+        var i = 0;
+        function deleteNext() {
+          if (i >= queue.length) return resolve();
+          var el = queue[i];
+          placeCursorAt(root, el);
+          function delChar() {
+            var text = el.textContent || "";
+            if (text.length === 0) {
+              if (hideTrailing) {
+                var seg = el.closest("[data-crumb-segment]");
+                if (seg) seg.style.display = "none";
+                // After hiding, move cursor to the previous still-visible
+                // text element (or the root if there is none).
+                var remaining = allTargets.slice(0, allTargets.length - 1 - i);
+                if (remaining.length > 0) {
+                  placeCursorAt(root, remaining[remaining.length - 1]);
+                } else {
+                  var cursor = root.querySelector("[data-terminal-cursor]");
+                  if (cursor) root.appendChild(cursor);
+                }
+              }
+              i++;
+              setTimeout(deleteNext, DELETE_GAP_BETWEEN_CRUMBS_MS);
+              return;
+            }
+            el.textContent = text.slice(0, -1);
+            setTimeout(delChar, stepMs);
+          }
+          delChar();
+        }
+        deleteNext();
+      });
+    }
+
+    // Keep the persisted .site-nav-backdrop sized to the live header. The
+    // backdrop lives outside the view-transition snapshot to preserve its
+    // backdrop-filter across navigations, so we sync its height in JS.
+    var heightObserver = null;
+    function syncBackdropHeight() {
+      var header = document.querySelector("body > header");
+      if (!header) return;
+      var h = header.offsetHeight;
+      if (h > 0) {
+        document.documentElement.style.setProperty(
+          "--site-nav-height",
+          h + "px"
+        );
+      }
+    }
+    function attachHeightObserver() {
+      if (heightObserver) {
+        try {
+          heightObserver.disconnect();
+        } catch (e) {}
+        heightObserver = null;
+      }
+      var header = document.querySelector("body > header");
+      if (!header) return;
+      syncBackdropHeight();
+      if (typeof ResizeObserver !== "undefined") {
+        heightObserver = new ResizeObserver(syncBackdropHeight);
+        heightObserver.observe(header);
+      }
+    }
+    attachHeightObserver();
+    document.addEventListener("astro:after-swap", attachHeightObserver);
+    window.addEventListener("resize", syncBackdropHeight);
+
+    // The moment a breadcrumb link is clicked, lock its color to full
+    // opacity so it doesn't visibly dim during the exit backspace before the
+    // new page (where it becomes the terminal crumb at full opacity) loads.
+    // Capture phase so we run before navigation logic.
+    document.addEventListener(
+      "click",
+      function (e) {
+        var target = e.target;
+        if (!target || !target.closest) return;
+        var link = target.closest("[data-crumb-segment] a");
+        if (link) link.classList.add("terminal-crumb-active");
+      },
+      true
+    );
+
+    // Mobile menu open/close. v1 — toggle on button click, close on link
+    // click or outside click, close on Escape.
+    function setMenuOpen(open) {
+      var panel = document.querySelector("[data-menu-panel]");
+      var toggle = document.querySelector("[data-menu-toggle]");
+      if (!panel) return;
+      panel.setAttribute("data-open", open ? "true" : "false");
+      panel.setAttribute("aria-hidden", open ? "false" : "true");
+      if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    document.addEventListener("click", function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest("[data-menu-toggle]")) {
+        var panel = document.querySelector("[data-menu-panel]");
+        var isOpen = panel && panel.getAttribute("data-open") === "true";
+        setMenuOpen(!isOpen);
+        return;
+      }
+      var panel = document.querySelector("[data-menu-panel]");
+      if (!panel || panel.getAttribute("data-open") !== "true") return;
+      // Click inside the panel on a link → flash pressed state, then close
+      // (navigation will swap the DOM out shortly after).
+      var menuLink = t.closest("[data-menu-link]");
+      if (menuLink) {
+        menuLink.setAttribute("data-pressed", "true");
+        setMenuOpen(false);
+        return;
+      }
+      // Click outside the panel → close.
+      if (!t.closest("[data-menu-panel]")) setMenuOpen(false);
+    });
+    function focusToggle() {
+      var toggle = document.querySelector("[data-menu-toggle]");
+      if (toggle && typeof toggle.focus === "function") toggle.focus();
+    }
+    function focusFirstMenuLink() {
+      var first = document.querySelector("[data-menu-link]");
+      if (first && typeof first.focus === "function") first.focus();
+    }
+    document.addEventListener("keydown", function (e) {
+      var panel = document.querySelector("[data-menu-panel]");
+      var isOpen = panel && panel.getAttribute("data-open") === "true";
+
+      if (e.key === "Escape") {
+        if (e.defaultPrevented) return;
+        if (isOpen) {
+          e.preventDefault();
+          setMenuOpen(false);
+          focusToggle();
+        }
+        return;
+      }
+      // `M` toggles the menu. Skipped while a modifier is held (so Cmd+M /
+      // Ctrl+M / Alt+M keep their browser/OS meaning) and while the user is
+      // typing into any editable element.
+      if (e.key === "m" || e.key === "M") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (
+          t &&
+          t.closest &&
+          t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')
+        ) {
+          return;
+        }
+        e.preventDefault();
+        setMenuOpen(!isOpen);
+        // Move focus into / out of the menu so Tab continues somewhere
+        // sensible. Wait a tick so the panel becomes focusable
+        // (pointer-events flip + transition end aren't blocking, but the
+        // attribute write must paint first).
+        if (!isOpen) {
+          requestAnimationFrame(focusFirstMenuLink);
+        } else {
+          focusToggle();
+        }
+      }
+    });
+    // Close menu after every view-transition (it shouldn't persist across nav).
+    document.addEventListener("astro:after-swap", function () {
+      setMenuOpen(false);
+    });
+
+    // Type on first load and after every view-transition swap.
+    document.addEventListener("astro:page-load", typeBreadcrumb);
+
+    // Strip the `data-just-demoted` marker only after the chip-fade-in
+    // animation completes — it's the longer of the two animations keyed off
+    // that attribute, so removing the attr earlier would cancel it.
+    document.addEventListener("animationend", function (e) {
+      if (e.animationName !== "chip-fade-in") return;
+      var anchor =
+        e.target &&
+        e.target.closest &&
+        e.target.closest("a[data-just-demoted]");
+      if (anchor) anchor.removeAttribute("data-just-demoted");
+    });
+
+    // Diff-aware exit: backspace only the differing tail, pre-fill the new
+    // document's crumbs with the shared prefix so the post-swap typing skips
+    // them.
+    document.addEventListener("astro:before-preparation", function (event) {
+      var originalLoader = event.loader;
+      event.loader = async function () {
+        // Snapshot the OLD crumbs from the live DOM before anything mutates.
+        var oldCrumbs = readCrumbs(document);
+
+        // Let Astro fetch & parse the next page; this populates event.newDocument.
+        await originalLoader();
+
+        var newDoc = event.newDocument;
+        var newCrumbs = newDoc ? readCrumbs(newDoc) : [];
+
+        var keep = commonPrefixLen(oldCrumbs, newCrumbs);
+
+        // Pre-fill the new document's first `keep` crumbs with their final
+        // text and mark them so the typing pass on the new page skips them.
+        // Clear the rest, so the swap never paints a frame of the full
+        // destination text before the typing script blanks them.
+        if (newDoc) {
+          var newTargets = Array.prototype.slice.call(
+            newDoc.querySelectorAll("[data-terminal-text]")
+          );
+          for (var i = 0; i < newTargets.length; i++) {
+            if (i < keep) {
+              newTargets[i].textContent = newCrumbs[i];
+              newTargets[i].setAttribute("data-terminal-prefilled", "1");
+            } else {
+              newTargets[i].textContent = "";
+            }
+          }
+          // Going deeper? The crumb that was *terminal* on the old page
+          // (last index in oldCrumbs) is now a middle link — mark its anchor
+          // so CSS can fade its color from white → dim instead of flipping
+          // instantly.
+          if (newCrumbs.length > oldCrumbs.length && oldCrumbs.length >= 1) {
+            var demotedIdx = oldCrumbs.length - 1;
+            var demotedTarget = newTargets[demotedIdx];
+            var demotedAnchor = demotedTarget && demotedTarget.closest("a");
+            if (demotedAnchor) {
+              demotedAnchor.setAttribute("data-just-demoted", "1");
+            }
+          }
+        }
+
+        // If the new page has fewer crumbs than the old, the trailing segments
+        // will be gone entirely after swap — hide them as they empty so we
+        // never flash an orphan chevron.
+        var hideTrailing = newCrumbs.length < oldCrumbs.length;
+
+        // Promote the live crumb that will be the *terminal* crumb on the
+        // new page to full opacity. Covers cases where the user clicked
+        // something outside the breadcrumb (e.g. the site nav) but the
+        // breadcrumb still shifts a link from 40% to 100% on swap.
+        if (newCrumbs.length > 0 && newCrumbs.length - 1 < keep) {
+          var liveTargets = Array.prototype.slice.call(
+            document.querySelectorAll("[data-terminal-text]")
+          );
+          var becomingTerminal = liveTargets[newCrumbs.length - 1];
+          if (becomingTerminal) {
+            var anchor = becomingTerminal.closest("a");
+            if (anchor) anchor.classList.add("terminal-crumb-active");
+          }
+        }
+
+        await backspaceFrom(keep, hideTrailing);
+      };
+    });
+  })();
+</script>

@@ -1,0 +1,39 @@
+---
+title: "Hostaway Integration"
+summary: "Automated the manual data entry step by connecting directly to Hostaway, their property management platform. Built an admin report workbench for reviewing and confirming pulled data before report generation."
+type: "shipped"
+stage: "Stage 2"
+ctaLabel: "Read write-up →"
+date: 2025-11-15
+tags: ["Integration", "Workflow Automation"]
+services:
+  - 02-fixing-brittle-internal-systems
+outcomes:
+  - title: "An integration validated cheaply"
+    description: "CLI-first development meant the Hostaway integration was working and tested before we invested in the UI around it. A pattern we now repeat."
+  - title: "A controlled place for edge cases"
+    description: "The admin workbench gives the team somewhere structured to review, supplement, and confirm pulled data — without ever touching a spreadsheet."
+---
+
+import Callout from "@components/case-study/Callout.astro";
+import InlineNote from "@components/case-study/InlineNote.astro";
+import { Layers } from "@lucide/astro";
+
+## Cutting out the manual data entry entirely.
+
+With the core application running, the next stage was eliminating the manual step that remained: each month, someone had to pull data from Hostaway — Aire Spaces' operational platform — and populate the sheet before uploading. We built a Hostaway integration that does this automatically.
+
+We also built an admin-side report workbench: a structured interface for reviewing the pulled data, supplementing it with the fields that still come from outside Hostaway, and confirming before reports are generated. This gave the team a clear and controlled place to handle edge cases without having to touch a spreadsheet.
+
+<Callout title="On building the integration" icon={Layers}>
+  <ul class="space-y-3 list-none p-0">
+    <li class="flex gap-3"><span style="color: #7EC7FF;">•</span><span>Explored the Hostaway API surface before committing to any data model.</span></li>
+    <li class="flex gap-3"><span style="color: #7EC7FF;">•</span><span>Drafted a CLI tool first — faster to validate the integration without the bulk of the application UI around it.</span></li>
+    <li class="flex gap-3"><span style="color: #7EC7FF;">•</span><span>Used Figma Make again to prototype the admin workbench UI before coding it.</span></li>
+    <li class="flex gap-3"><span style="color: #7EC7FF;">•</span><span>AI-assisted development for the integration layer — fast to write, but still required the exploration work up front to get it right.</span></li>
+  </ul>
+</Callout>
+
+<InlineNote>
+CLI-first validation is a pattern worth repeating. Get confidence in the integration before adding the UI. Cheaper to throw away a script than a screen.
+</InlineNote>

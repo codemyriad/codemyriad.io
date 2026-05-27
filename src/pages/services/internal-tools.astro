@@ -15,9 +15,13 @@ const getPost = (slug: string) => blogMap[slug];
 <PageLayout
   title="Internal Tools"
   description="Custom internal tools that replace spreadsheets, workarounds, and brittle automation. Built around how work actually gets done."
+  breadcrumb={[
+    { label: "Services", href: "/services" },
+    { label: "Internal Tools" },
+  ]}
 >
   <Container>
-    <div class="space-y-20 py-8">
+    <div class="space-y-20 py-8 max-w-screen-lg mx-auto">
 
       <!-- Page header -->
       <section class="space-y-3">

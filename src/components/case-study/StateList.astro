@@ -1,0 +1,49 @@
+---
+// Titled list of short, bulleted points. Always uses a dot bullet (no
+// configurable variant — keeps the visual rhythm consistent across case
+// studies). Icon accepts any Lucide component reference, matching Callout.
+//
+//   import { Database } from "@lucide/astro";
+//   <StateList title="..." icon={Database} accent="teal" items={[...]} />
+
+type Props = {
+  title: string;
+  items: string[];
+  icon?: any;
+  accent?: "teal" | "amber";
+  class?: string;
+};
+
+const {
+  title,
+  items,
+  icon: Icon,
+  accent = "amber",
+  class: className = "",
+} = Astro.props;
+
+const accentColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
+---
+
+<div class={`not-prose bg-white/5 border border-white/10 p-4 ${className}`}>
+  <h4
+    class="text-base font-bold mb-3 flex items-center gap-2"
+    style={`color: ${accentColor};`}
+  >
+    {Icon && <Icon size={14} />}
+    <span>{title}</span>
+  </h4>
+  <ul class="space-y-2.5 text-sm text-body list-none p-0">
+    {items.map((item) => (
+      <li class="flex gap-4">
+        <span
+          class="select-none shrink-0"
+          style={`color: ${accentColor};`}
+        >
+          •
+        </span>
+        <span>{item}</span>
+      </li>
+    ))}
+  </ul>
+</div>
