@@ -1,35 +1,44 @@
 ---
 # --- Required ---
 title: "Cassini"
-description: ""
-date: 2024-01-01
-author: ""
+description: "A modular, self-hosted call-recording and transcription backend for Nextcloud Talk — built because the default recorder kept crashing our calls."
+date: 2026-01-15
+author: "Chris De Sousa"
 
 # --- Client identity & framing ---
 client: "Cassini"
-tagline: ""
-summary: ""
-tldr: ""
+tagline: "Self-hosted call transcription and summary tooling — first for us, then for everyone else running Nextcloud"
+summary: "Modular WebRTC recording and transcription for Nextcloud Talk, designed to be light during the call and self-contained after."
+tldr: "Cassini is a call-recording and transcription backend for Nextcloud Talk. It started because the default recorder kept crashing our meetings. It is heading toward the Nextcloud app marketplace as a drop-in alternative."
 # website: "https://" # must be a valid URL if present; comment out otherwise
 
 # --- Engagement metadata ---
-industry: ""
-location: ""
-status: "active" # "active" | "past"
-engagementType: "ongoing" # "ongoing" | "one-off"
-firstEngagement: 2024
+industry: "Open-source collaboration suites / meeting transcription"
+# location: ""
+status: "active"
+engagementType: "ongoing"
+firstEngagement: 2025
 
 # --- Cross-links & surfacing ---
-services: [] # references to service slugs, e.g. [02-fixing-brittle-internal-systems]
-tags: [] # e.g. ["Internal Tools", "Automation"]
+services: []
+tags: ["Self-hosted", "WebRTC", "Transcription", "Nextcloud", "Open Source"]
 # featured: false
-# caseStudyOrder: [] # manual order of case-study slugs under case-studies/<this-project>/
+caseStudyOrder:
+  - from-hack-to-nextcloud-app
 
 # --- Repo / demo links (optional) ---
 # demoURL: ""
 # repoURL: ""
 
-draft: false # set to true to hide from index pages
+draft: false
 ---
 
-{/* Project overview body — appears in the "About this project" block on /projects/<slug> */}
+Cassini is a call-recording and transcription backend for Nextcloud Talk. It exists because the default recorder shipped with Nextcloud Talk kept crashing our calls.
+
+We run our own infrastructure as a matter of principle — Zulip, Nextcloud, the rest — and we wanted live transcriptions during meetings and post-call summaries feeding into our working notes. The default Nextcloud Talk recording module is architected as a headless browser that joins each call as a participant, running on the same server as Nextcloud Talk itself. That turned out to be heavy enough to take the whole thing down with it. It did, repeatedly.
+
+Silvio started Cassini as a vibe-engineered side project. Partly to scratch an immediate itch — he had a habit of zoning out in long calls and wanting to catch up on what he had missed — and partly because there was an architectural call worth getting right: a recorder for calls should be **modular and composable**, and **light enough during the call** that it does not compromise the call itself. Transcription and summarisation can happen after; only capture needs to be live.
+
+Cassini is in active development. The current work is the move from personal hack to shippable Nextcloud app — embedding the transcript viewer, swapping Cassini in as the transcription backend, and getting it onto the Nextcloud app marketplace so it can stand alongside the default as a drop-in alternative.
+
+Cassini is also the start of something broader for us. We are positioning behind **open-source, privacy-focused, LLM-based infrastructure for small companies** — software that small teams can run on their own terms, rather than only renting access to. Cassini is the first concrete piece of that direction.
