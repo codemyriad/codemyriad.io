@@ -7,7 +7,11 @@ import { PROJECTS } from "@consts";
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  .sort((a, b) => {
+    const aName = a.data.client ?? a.data.title;
+    const bName = b.data.client ?? b.data.title;
+    return aName.localeCompare(bName);
+  });
 
 // Load all case studies once so we can attribute counts per project below.
 const allCaseStudies = (await getCollection("case-studies")).filter(
