@@ -1,6 +1,6 @@
 ---
 title: "Librocco"
-description: "An open-source, local-first inventory system for managing books. Built with cr-sqlite, it enables accurate stock tracking across multiple terminals - even when one drops offline."
+description: "An open-source, local-first inventory system for independent bookshops — built because the next customer is already at the counter, and stock-keeping that waits on the network costs the shop floor every day."
 client: "Librocco"
 tagline: "Local-first inventory management for independent bookshops"
 website: "https://libroc.co"
@@ -21,7 +21,7 @@ caseStudyOrder:
   - inventory-ecommerce-sync
 ---
 
-Librocco is an open-source inventory management system for bookshops. It is also, in its own right, the system running daily at [Il Libraio](https://www.illibraio.it/) — the independent Italian bookstore that originally drove its existence. The two are inseparable: the bookshop's day-to-day operations sit on the same code we ship to GitHub, and what we change in one flows into the other.
+Librocco is an open-source inventory management system for bookshops. It is also, the system running daily at [Il Libraio - Cuneo](https://illibraiocuneo.com/) — the independent Italian bookstore that originally drove its existence.
 
 Silvio first wrote a version of Librocco more than fifteen years ago, while working in Il Libraio. The current rebuild is a continuation of that work, started for three reasons:
 
@@ -29,8 +29,7 @@ Silvio first wrote a version of Librocco more than fifteen years ago, while work
 
 2. **We wanted to push the boat out on local-first.** Local-first patterns are hard to work in, and that's exactly why we wanted to. The way software has been built over the last decade has made it easy to lean on a stable connection and someone else's cloud. We think it's worth pushing the other way so that the hard parts get easier over time — for ourselves, and for the projects that come after us.
 
-3. **The off-the-shelf options weren't good enough.** Silvio looked at what was on the market for an independent bookshop in Il Libraio's position, and didn't rate any of it. The available tools were clunky and slow — and clunky, slow software has a real cost on the shop floor every day, in a job where the next customer is already at the counter.
+3. **The off-the-shelf options weren't good enough.** Silvio looked at what was on the market for an independent bookshop in Il Libraio's position, and didn't rate any of it. The available tools were clunky and slow — and clunky, slow software has a real cost on the shop floor every day, in a job where the next customer is already at the counter. And the two reasons connect: those tools were slow in large part because they were not local-first — every stock action a round-trip to someone else's server. 
 
 Librocco is local-first by design. It runs in the browser on top of [CR-SQLite](https://github.com/vlcn-io/cr-sqlite) — a CRDT extension to SQLite compiled to WebAssembly — stores its data locally, and resolves conflicts across terminals automatically. It is released under the [GNU Affero licence](https://github.com/librocco/librocco/blob/main/LICENSE), and is used daily in Il Libraio to manage 100k+ stock and transaction records. You can try it with full production data at [libroc.co/demo](https://libroc.co/demo/#).
 
-The work is supported by the bookshops who use it. They care less about monetising the software than about *using* it to keep their businesses running smoothly. Our motivation is similar: we want to see resilient, open-source tools serving real communities — and to keep proving they can.
