@@ -11,7 +11,6 @@ related:
 We started by building Librocco around CouchDB & PouchDB, but eventually decided this wasn't a viable path forward. There were several reasons for this: [CouchDB's shortcomings](https://news.ycombinator.com/item?id=17114810#17116306); PouchDB's outdated docs — but ultimately the deciding factor was *sync performance*. With full production data, two syncing nodes could take more than 30 minutes to communicate changes. This created challenges: how would we keep the UI responsive while this is ongoing, and how would we present conflict resolution in a way that doesn't overwhelm after all of this time?
 
 We researched alternatives and landed on CR-SQLite because:
-
 1. SQL felt familiar
 2. CRDT-based sync resolved conflicts without complex user-facing logic
 3. It can be used with *or without* a central coordinating server, making it a true peer-to-peer option.
