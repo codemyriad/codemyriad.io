@@ -15,7 +15,7 @@ industry: "Open-source collaboration suites / meeting transcription"
 # location: ""
 status: "active"
 engagementType: "ongoing"
-firstEngagement: 2025
+firstEngagement: 2026
 
 # --- Cross-links & surfacing ---
 services: []
@@ -26,14 +26,14 @@ caseStudyOrder:
 
 # --- Repo / demo links (optional) ---
 # demoURL: ""
-# repoURL: ""
+repoURL: "https://github.com/codemyriad/gocassini"
 
 draft: false
 ---
 
 Cassini is a call-recording and transcription backend for Nextcloud Talk. It exists because the default recorder shipped with Nextcloud Talk kept crashing our calls.
 
-We run our own infrastructure as a matter of principle — Zulip, Nextcloud, the rest — and we wanted live transcriptions during meetings and post-call summaries feeding into our working notes. The default Nextcloud Talk recording module is architected as a headless browser that joins each call as a participant, running on the same server as Nextcloud Talk itself. That turned out to be heavy enough to take the whole thing down with it. It did, repeatedly.
+We run our own infrastructure as a matter of principle — Zulip, Nextcloud, the rest — and we wanted live transcriptions during meetings and post-call summaries feeding into our working notes. The default Nextcloud Talk recording module is architected as a headless browser that joins each call as a participant, running on the same server as Nextcloud Talk itself. That turned out to be heavy enough to take the whole thing down with it. 
 
 Silvio started Cassini as a vibe-engineered side project. Partly to scratch an immediate itch — he had a habit of zoning out in long calls and wanting to catch up on what he had missed — and partly because there was an architectural call worth getting right: a recorder for calls should be **modular and composable**, and **light enough during the call** that it does not compromise the call itself. Transcription and summarisation can happen after; only capture needs to be live.
 
