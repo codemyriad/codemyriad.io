@@ -7,8 +7,8 @@ export const SITE: Site = {
 };
 
 export const HOME: Metadata = {
-  TITLE: "Home",
-  DESCRIPTION: "Astro Nano is a minimal and lightweight blog and portfolio.",
+  TITLE: "Operational systems for growing companies",
+  DESCRIPTION: "Operational systems and internal tools for growing companies — the connective tissue between tools, teams, and workflows.",
 };
 
 export const BLOG: Metadata = {
