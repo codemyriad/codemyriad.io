@@ -1,11 +1,71 @@
 ---
 title: "SnapMenu — a sales tool that became a product feature"
-summary: "An LLM-backed microservice that turns photos of a menu into Edible-shaped JSON. Built to unblock Alex's prospecting workflow, then folded into onboarding and in-product menu creation."
+summary: "An LLM-backed service that turns photos of a menu into Edible-shaped JSON. Built to unblock Alex's prospecting workflow, then folded into onboarding and in-product menu creation."
 type: "shipped"
-ctaLabel: "Write-up in progress"
-writeUp: false
+ctaLabel: "Read case study →"
 date: 2025-07-01
 tags: ["LLM", "Product", "Sales"]
+outcomes:
+  - title: "A sales pipeline no longer rate-limited by data entry"
+    description: "What used to take an evening per demo became a review and a send. Alex's pursuit capacity is no longer capped by how fast he can transcribe menus into a form."
+  - title: "Onboarding that starts from a photo, not a blank form"
+    description: "New restaurants no longer face the same form-by-form click-through Alex was doing manually. They upload a few photos of their existing menu and get an initial draft to refine — friction removed at the exact moment a user is deciding whether the product is for them."
+  - title: "One investment, two use cases"
+    description: "The same service powers Alex's outreach and the first-run experience inside the product. Sales pitch and onboarding became the same artefact."
 ---
 
-Placeholder — full write-up coming soon.
+import Stage from "@components/case-study/Stage.astro";
+import InlineNote from "@components/case-study/InlineNote.astro";
+import StateList from "@components/case-study/StateList.astro";
+import { Camera } from "@lucide/astro";
+
+<Stage label="Where it started" heading="A sales process that was working — but barely scaling">
+
+SnapMenu started inside Alex's sales process, not on a product roadmap. His instinct for cold outreach was to **show, not tell** — rather than describe what Edible could do for a restaurant, send the prospect a live demo of *their own menu*, already rendered in Edible. When a restaurant saw their menu working — formatted, allergen-aware, ready to share — the value landed in a way no generic demo could match.
+
+The problem was the process behind it. For every prospect, Alex would find what menus they had publicly available on Google or their site, then use Edible's existing dashboard — a series of forms and steps — to recreate the menu by hand: create a menu, add a section, write the section title, add a menu item, define allergen information, repeat for every item and every section. The dashboard ultimately produces a JSON object that powers Edible's menu viewer; Alex was effectively transcribing a restaurant's menu by hand into that JSON, item by item, so the viewer could render a demo link he could send.
+
+<StateList
+  title="The state of things"
+  icon={Camera}
+  accent="amber"
+  items={[
+    "Each demo cost hours of manual data entry before anything could be sent",
+    "Sales activity was directly rate-limited by demo production",
+    "The work was necessary for selling — and actively preventing selling",
+    "Alex kept doing it because the conversion uplift from a personalised demo was real",
+  ]}
+/>
+
+</Stage>
+
+<Stage label="The insight" heading="The bottleneck wasn't rendering. It was extraction.">
+
+Edible could already render menus from JSON — the viewer was the cheap, reliable part of the pipeline. The slow part was upstream: turning a photo of a menu, or a photo of an allergen spreadsheet, into the structured JSON the viewer needed. So we built SnapMenu as an **LLM-backed microservice** that automates exactly that step.
+
+SnapMenu accepts photos — menu cards, allergen spreadsheets, whatever Alex finds while prospecting — and runs them through an LLM with a prompt we wrote against Edible's existing JSON schema. The output drops straight into the same pipeline the manual dashboard produces, so the rendered demo is indistinguishable from a hand-built one, just produced in a fraction of the time.
+
+</Stage>
+
+<Stage label="Workflow fit" heading="From a folder of photos to a sendable demo">
+
+Alex uses SnapMenu as a service: upload the photos he collected during prospecting, receive back a generated menu JSON and a demo link he can send. What used to take an evening became a review and a send — and combined with the [menu embed](/projects/02-what-is-edible/menu-embed), the demo link is something a restaurant can place natively on its own site rather than only on a hosted URL. The sales process didn't change. The ceiling on it did.
+
+<InlineNote>
+The piece we did not build first was a fully end-to-end "point it at a restaurant's website" feature. That is a small additional lift, and worth doing — but the value was already in the data-extraction step. Build the bottleneck, not the wrapper.
+</InlineNote>
+
+</Stage>
+
+<Stage label="The unexpected win" heading="From sales tool to product feature">
+
+The purpose at the outset was to solve Alex's sales-time problem. In doing it, we ended up creating a feature for the application itself. The same SnapMenu service is now used in two places inside the product:
+
+- **Onboarding.** New users no longer face the same form-by-form click-through Alex was doing manually. They upload a few photos of their existing menu, and SnapMenu generates an initial draft to refine.
+- **Inside the dashboard.** Existing users can seed new menu creation via SnapMenu rather than building from a blank form every time.
+
+That matters specifically because of what Edible is for. A large part of Edible's value proposition is removing the operational friction between the kitchen (who drafts a menu) and the front-of-house (who has to publish it and pass on the allergen information). The form-by-form transcription was exactly the kind of friction Edible exists to remove — and SnapMenu now removes it at onboarding and at every menu update.
+
+There is also a tighter link between sales and product now. The thing that greets a new user on day one is the same thing that powers Alex's outreach. What gets shown in a demo is what someone gets when they sign up.
+
+</Stage>
