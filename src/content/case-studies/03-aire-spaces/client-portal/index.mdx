@@ -1,14 +1,54 @@
 ---
 title: "Client Portal"
-summary: "Supabase-powered portal giving each client a login to access their reports directly. Replaced the email-a-link workflow. Includes a light client and property management interface."
+summary: "A Supabase-backed portal where each Aire Spaces client logs in to access their reports — current and past — directly. Ended the monthly mail-merge, kept the printable PDF."
 type: "shipped"
 stage: "Stage 2"
-ctaLabel: "Write-up in progress"
-writeUp: false
+ctaLabel: "Read case study →"
 date: 2025-12-01
 tags: ["Client Portal", "Auth"]
 services:
   - 02-fixing-brittle-internal-systems
+outcomes:
+  - title: "The mail-merge replaced"
+    description: "Every month, each client's document used to be assembled and sent by hand. Now the report is already there, waiting, the moment it is ready."
+  - title: "Access without email chains"
+    description: "Clients log in. Reports — current and past — live there permanently. No more sending links, no more chasing the right version."
+  - title: "A natural lift on familiar ground"
+    description: "Supabase is a recurring part of how we build. The auth, the row-level access — none of it was the first time we had wired that pattern up. That made this stage cheap to ship and easy to trust."
 ---
 
-Placeholder — full write-up coming soon.
+import Stage from "@components/case-study/Stage.astro";
+import InlineNote from "@components/case-study/InlineNote.astro";
+import StateList from "@components/case-study/StateList.astro";
+import { Mail } from "@lucide/astro";
+
+<Stage label="The problem" heading="Sharing reports without sending the wrong one">
+
+Alongside the work on [the report itself](/projects/03-aire-spaces/report-redesign), there was a separate problem to solve: how Aire Spaces shared reports with their clients. Every month, twenty documents had to be assembled, addressed, and sent out by hand — and the overhead of doing that was only part of it. With a manual mail-merge, the chance of slipping a report into the wrong inbox was real, and the cost of getting it wrong — sharing one client's financials with another — is not the kind of mistake anyone wants to find out about.
+
+There was a quieter cost too. Past reports lived in the email history of whoever had sent them, so anything older than the most recent month meant a request, a search, and a re-send.
+
+<StateList
+  title="The state of things"
+  icon={Mail}
+  accent="amber"
+  items={[
+    "Twenty documents to assemble and mail-merge by hand each month",
+    "A real risk of sending a client's report to the wrong recipient",
+    "Past reports lived in email — every retrieval was a request",
+  ]}
+/>
+
+</Stage>
+
+<Stage label="The solution" heading="A login per client, on familiar ground">
+
+We reached for Supabase. We have reached for it on a number of projects, and the pieces we needed here — migrations, auth, row-level security — were not the first time we had wired any of them up. Row-level security in particular mapped cleanly to what the situation called for, with a rule that a client only ever sees the reports tied to their own properties, enforced at the database layer rather than reimplemented in application code. There is no path through the portal that returns the wrong report to the wrong person.
+
+Around that, we built what was specific to Aire Spaces: a light admin surface for adding clients and assigning properties, the way reports surface inside the portal (current month at the front, history a click away), and the rules for how access propagates when a client gains or loses a property. The redesigned report still exports as a PDF for anyone who wants a print asset, but reading now happens in the portal more often than not — and the monthly mail-merge is gone with it.
+
+<InlineNote>
+Supabase — fast to wire up, RLS for access control, and a clean persistence layer for historical data. A strong, malleable component. A recurring part of how we build.
+</InlineNote>
+
+</Stage>
