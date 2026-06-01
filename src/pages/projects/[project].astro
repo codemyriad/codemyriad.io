@@ -57,6 +57,16 @@ const META_ROWS: MetaRow[] = [
     value: project.data.website,
     href: project.data.website,
   },
+  project.data.demoURL && {
+    label: "Demo",
+    value: project.data.demoURL,
+    href: project.data.demoURL,
+  },
+  project.data.repoURL && {
+    label: "Source",
+    value: project.data.repoURL,
+    href: project.data.repoURL,
+  },
   project.data.industry && { label: "Industry", value: project.data.industry },
   project.data.tags && project.data.tags.length > 0 && {
     label: "Services",
@@ -83,7 +93,7 @@ clickableStudies.forEach((cs, idx) => {
 
 <PageLayout
   title={`${client} — Project`}
-  description={project.data.summary ?? project.data.description}
+  description={project.data.description}
   breadcrumb={[
     { label: "Projects", href: "/projects" },
     { label: client },

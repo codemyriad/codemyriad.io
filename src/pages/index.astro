@@ -6,7 +6,6 @@ import BlogCard from "@components/BlogCard.astro";
 import ContactSection from "@components/ContactSection.astro";
 // import { dateRange } from "@lib/utils";
 import {
-  SITE,
   HOME,
   //LINKS
 } from "@consts";
@@ -22,8 +21,37 @@ const blog = (await getCollection("blog"))
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
+  .sort((a, b) => {
+    const aName = a.data.client ?? a.data.title;
+    const bName = b.data.client ?? b.data.title;
+    return aName.localeCompare(bName);
+  });
+
+const allCaseStudies = (await getCollection("case-studies")).filter(
+  (cs) => !cs.data.draft
+);
+
+const countsForProject = (projectSlug: string) => {
+  const projectKey = projectSlug.replace(/\/index$/, "").split("/")[0];
+  const studies = allCaseStudies.filter((cs) =>
+    cs.slug.startsWith(`${projectKey}/`)
+  );
+  const experiments = studies.filter(
+    (cs) => cs.data.type === "experiment"
+  ).length;
+  const work = studies.length - experiments;
+  return { total: studies.length, work, experiments };
+};
+
+const pluralize = (n: number, singular: string, plural?: string) =>
+  `${n} ${n === 1 ? singular : plural ?? `${singular}s`}`;
+
+const formatCounts = (c: { work: number; experiments: number }) => {
+  const parts: string[] = [];
+  if (c.work > 0) parts.push(pluralize(c.work, "case study", "case studies"));
+  if (c.experiments > 0) parts.push(pluralize(c.experiments, "experiment"));
+  return parts.join(" · ");
+};
 
 type ServiceEntry = {
   collection: "services";
@@ -111,18 +139,36 @@ const blogTitleColors = ["#F4C45C", "#F4915C"];
             <h2 class="text-xl font-medium text-[#FAFAFA]/50">Projects</h2>
           </div>
           {
-            projects.map((project) => (
+            projects.map((project) => {
+              const counts = countsForProject(project.slug);
+              const countsLabel = formatCounts(counts);
+              return (
               <a
                 href={`/${project.collection}/${project.slug}`}
                 class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
               >
                 <div class="space-y-3">
                   <h3 class="text-xl font-medium text-[#FAFAFA]">
-                    {project.data.title}
+                    {project.data.client ?? project.data.title}
                   </h3>
                   <p class="text-base text-[#FAFAFA]/60">
                     {project.data.description}
                   </p>
+                  {counts.total > 0 && (
+                    <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-[#FAFAFA]/50">
+                      <span class="relative w-2 h-2 inline-block">
+                        <span
+                          class="absolute inset-0 rounded-full animate-ping opacity-60"
+                          style="background: #7EC7FF;"
+                        />
+                        <span
+                          class="relative block w-2 h-2 rounded-full"
+                          style="background: #7EC7FF;"
+                        />
+                      </span>
+                      <span>{countsLabel}</span>
+                    </div>
+                  )}
                 </div>
                 <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
                   <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
@@ -139,7 +185,8 @@ const blogTitleColors = ["#F4C45C", "#F4915C"];
                   </span>
                 </div>
               </a>
-            ))
+              );
+            })
           }
         </div>
       </section>

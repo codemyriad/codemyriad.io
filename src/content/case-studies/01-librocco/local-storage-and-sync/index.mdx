@@ -1,0 +1,18 @@
+---
+title: "Exploring options for local storage & sync"
+summary: "From CouchDB & PouchDB to CR-SQLite — what 30-minute sync times taught us, and why a CRDT-on-SQLite path turned out to be the right one. Includes our recent contribution adding OPFS to CR-SQLite."
+type: "shipped"
+date: 2025-09-01
+tags: ["Local-first", "CRDTs", "Architecture"]
+related:
+  - 01-contributing-opfs-cr-sqlite
+---
+
+We started by building Librocco around CouchDB & PouchDB, but eventually decided this wasn't a viable path forward. There were several reasons for this: [CouchDB's shortcomings](https://news.ycombinator.com/item?id=17114810#17116306); PouchDB's outdated docs — but ultimately the deciding factor was *sync performance*. With full production data, two syncing nodes could take more than 30 minutes to communicate changes. This created challenges: how would we keep the UI responsive while this is ongoing, and how would we present conflict resolution in a way that doesn't overwhelm after all of this time?
+
+We researched alternatives and landed on CR-SQLite because:
+1. SQL felt familiar
+2. CRDT-based sync resolved conflicts without complex user-facing logic
+3. It can be used with *or without* a central coordinating server, making it a true peer-to-peer option.
+
+We recently [contributed to CR-SQLite](/blog/01-contributing-opfs-cr-sqlite), updating it to the latest WA-SQLite in order to enable [OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) as a storage layer. Since SQLite stores everything in a single file, this makes importing and exporting data from local storage far easier, and also improves our initial sync times significantly.

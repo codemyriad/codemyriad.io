@@ -1,0 +1,62 @@
+---
+title: "Menu Embed — a restaurant's menu, living natively on its own site"
+summary: "A drop-in component that lets a restaurant's Edible-managed menu live natively on their own website. JSON published to a bucket, embed published as a static asset, snippet pasted in — no hosting, no build step, styles that inherit by default."
+type: "shipped"
+ctaLabel: "Read case study →"
+date: 2025-03-01
+tags: ["Product", "Embed", "Component"]
+outcomes:
+  - title: "The menu lives where the customer already is"
+    description: "Restaurants stop sending diners off to a whatisedible.com URL. The menu sits inside their own site, on their own domain, in their own brand."
+  - title: "No hosting, no build step"
+    description: "A snippet, pasted in. No developer involvement beyond that — the right friction level for the audience."
+  - title: "Composability with SnapMenu"
+    description: "Photo → SnapMenu → JSON → embed. A live, brand-respecting demo link in minutes. The embed is what makes that path actually land for the prospect."
+---
+
+import Stage from "@components/case-study/Stage.astro";
+import InlineNote from "@components/case-study/InlineNote.astro";
+
+<Stage label="How it started" heading="A hosted viewer that was the right way to begin">
+
+Edible was constructed around a builder that generates JSON. From the start, we hosted the menus on Edible's own domain at `whatisedible.com/<restaurant>/menu` — the dashboard produced the JSON, a hosted viewer rendered it, restaurants got a link. The viewer worked well enough that we could ask restaurants to add it to their Google profile or link to it from their own site.
+
+That viewer still exists, and it is not going away. It is moving toward a different purpose: a **directory** where end users — diners, especially those with dietary restrictions — can discover and search across restaurant menus that use Edible. A complementary use case, not a replacement.
+
+</Stage>
+
+<Stage label="The mismatch" heading="A hosted link is the wrong fit for a restaurant with its own website">
+
+Most restaurants Edible serves already have a website. Their own domain, their own branding, their own fonts and colours — a site that is already part of their digital presence. Asking them to send their customers off to a `whatisedible.com` URL was the wrong fit. The challenge was giving them something more useful **inside the ecosystem they already have**, rather than asking them to point away from it.
+
+</Stage>
+
+<Stage label="The embed" heading="Two static pieces, and a snippet to glue them together">
+
+We built a menu embed: a way for a restaurant's Edible-managed menu to live directly on their own website. The architecture has two parts that we publish and distribute separately.
+
+The **data** is the JSON the builder has always produced — but when a restaurant publishes their menu, that JSON is published to a bucket. It becomes accessible as a published asset rather than only consumed internally by Edible's hosted viewer.
+
+The **component** is the embed itself — a small static application layer, published as an asset rather than as an application hosted per-restaurant.
+
+The two pieces are tied together by a **snippet** the restaurant receives when they publish their menu. They paste it into their web page; it loads the static embed component and the menu JSON; the menu renders inside their site. No hosting, no build step, no developer involvement beyond pasting it in.
+
+<InlineNote>
+Separation of data and presentation. The JSON and the embed component cache, update and distribute independently. Restaurants get a stable snippet; we can iterate on the component without breaking integrations.
+</InlineNote>
+
+</Stage>
+
+<Stage label="Styling" heading="Native to the host site by default, deliberate when needed">
+
+The embed is set up so that, when placed on a restaurant's site, the styles **lift from the surrounding page**. The font, the background colour, the surrounding type weight — the menu conforms to the restaurant's digital space rather than looking like a foreign object pasted in.
+
+On top of that, we are adding controls for restaurants to deliberately custom-style their embed — so they can set how the menu looks rather than only relying on inheritance. Sensible defaults, opt-in customisation.
+
+</Stage>
+
+<Stage label="What it composes with" heading="The embed and SnapMenu, together">
+
+The embed is what makes the [SnapMenu](/projects/02-what-is-edible/snapmenu) workflow land end-to-end. Photo → SnapMenu → JSON → embed. A live, brand-respecting demo link in minutes — exactly the artefact that turns Alex's outreach into a real conversation. The two pieces were built independently, for different reasons. They end up doing more together than either does alone.
+
+</Stage>

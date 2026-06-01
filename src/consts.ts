@@ -4,12 +4,11 @@ export const SITE: Site = {
   NAME: "Code Myriad",
   NUM_POSTS_ON_HOMEPAGE: 3,
   NUM_WORKS_ON_HOMEPAGE: 2,
-  NUM_PROJECTS_ON_HOMEPAGE: 3,
 };
 
 export const HOME: Metadata = {
-  TITLE: "Home",
-  DESCRIPTION: "Astro Nano is a minimal and lightweight blog and portfolio.",
+  TITLE: "Operational systems for growing companies",
+  DESCRIPTION: "Operational systems and internal tools for growing companies — the connective tissue between tools, teams, and workflows.",
 };
 
 export const BLOG: Metadata = {

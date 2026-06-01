@@ -27,8 +27,6 @@ const projects = defineCollection({
     // New: client identity & framing
     client: z.string().optional(), // defaults to title if omitted
     tagline: z.string().optional(), // short subheading under project name
-    summary: z.string().optional(), // 1-line, used on /projects index card
-    tldr: z.string().optional(), // longer, used on project page hero paragraph
     website: z.string().url().optional(),
 
     // New: engagement metadata

@@ -134,7 +134,7 @@ const getPost = (slug: string) => blogMap[slug];
                 The problem was the process behind it. Building each demo meant manually parsing menu files, reformatting the data, and constructing everything from scratch. One demo could take hours. The approach was working, but the time it required was directly capping how many prospects could be in the pipeline at once.
               </p>
               <p class="text-base leading-relaxed text-body">
-                Codemyriad built a workflow that does the heavy lifting. It ingests a restaurant's existing menu files (like a print menu and allergen spreadsheet), processes the data using Optical Character Recognition (OCR), and generates a demo-ready output.
+                Codemyriad built a workflow that does the heavy lifting. It ingests a restaurant's existing menu files (like a print menu and allergen spreadsheet), runs them through an LLM-backed extraction service that understands menu structure and allergen information, and generates a demo-ready output.
               </p>
               <p class="text-base leading-relaxed text-body">
                 What used to take hours became a review and a send. The sales process didn't change. The ceiling on it did.
