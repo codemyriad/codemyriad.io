@@ -25,10 +25,19 @@ const groups: Array<{ title: string; items: Item[] }> = [
     items: [
       { keys: ["~"], label: "Home (or unshifted backtick)" },
       { keys: ["M"], label: "Toggle menu" },
-      { keys: ["S"], label: "Services" },
+      // On home & /services the bare S belongs to the services list below;
+      // navigating there still works via the open menu (M, then S).
+      { keys: ["S"], label: "Services (from other pages, or via open menu)" },
       { keys: ["P"], label: "Projects" },
       { keys: ["B"], label: "Blog" },
       { keys: ["C"], label: "Contact" },
+    ],
+  },
+  {
+    title: "Services list (home & /services)",
+    items: [
+      { keys: ["1"], label: "Services tab" },
+      { keys: ["2"], label: "How we work tab" },
     ],
   },
   {

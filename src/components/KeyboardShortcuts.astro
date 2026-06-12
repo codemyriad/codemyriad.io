@@ -3,23 +3,44 @@
 // elements (rendered by KbdChip) and clicks the nearest `<a>` or `<button>`
 // ancestor when the user types matching keys. The trim-from-left buffer means
 // typos like `xair` still resolve to `AIR`.
+//
+// Precedence when the same key appears more than once on a page:
+//   1. chips inside an open menu panel (resolved at keydown time — the panel
+//      visibly advertises its chips, so they must win while it's open)
+//   2. chips inside <main> (page-contextual shortcuts, e.g. the S/H tabs of
+//      the services list, which would otherwise be shadowed by the header)
+//   3. everything else, first in DOM order
 ---
 
 <script>
+  type ChipTarget = { target: HTMLElement; inMain: boolean };
+
+  // Module state persists across view transitions; `active` prevents the
+  // double-listener that init() at eval + astro:page-load would otherwise
+  // register on first load.
+  let active = false;
+
   const init = () => {
+    if (active) return;
+
     const chips = document.querySelectorAll<HTMLElement>("[data-shortcut]");
     if (!chips.length) return;
 
     // Reserved keys handled by dedicated listeners elsewhere (menu toggle, etc).
     const RESERVED = new Set(["M"]);
 
-    const map = new Map<string, HTMLElement>();
+    const map = new Map<string, ChipTarget>();
     chips.forEach((chip) => {
       const keys = chip.dataset.shortcut?.toUpperCase();
       if (!keys || RESERVED.has(keys)) return;
       const target = chip.closest<HTMLElement>("a, button");
-      if (!target || map.has(keys)) return;
-      map.set(keys, target);
+      if (!target) return;
+      const inMain = !!chip.closest("main");
+      const existing = map.get(keys);
+      // First in DOM wins, unless a later chip is main-scoped and the
+      // registered one isn't.
+      if (existing && !(inMain && !existing.inMain)) return;
+      map.set(keys, { target, inMain });
     });
     if (!map.size) return;
 
@@ -27,6 +48,40 @@
     for (const keys of map.keys()) {
       for (let i = 1; i <= keys.length; i++) prefixes.add(keys.slice(0, i));
     }
+
+    // Menu state changes at runtime, so the open-panel tier can't live in the
+    // build-time map: resolve it per keypress. While the menu is open it is
+    // modal for shortcuts — only its own chips resolve, nothing falls through
+    // to page targets behind the overlay (matches the pre-tier behavior,
+    // where every resolvable key while the menu was open was a panel chip).
+    const resolve = (keys: string): HTMLElement | undefined => {
+      if (RESERVED.has(keys)) return undefined;
+      // The shortcut guide is aria-modal: while it's open, the only shortcut
+      // allowed to resolve is its own toggle (`?` closes it again) — nothing
+      // may mutate or navigate the page behind the backdrop.
+      if (
+        document.querySelector('[data-shortcut-guide-dialog][data-open="true"]')
+      ) {
+        const target = map.get(keys)?.target;
+        return target?.matches("[data-shortcut-guide-toggle]")
+          ? target
+          : undefined;
+      }
+      const panel = document.querySelector<HTMLElement>(
+        '[data-menu-panel][data-open="true"]'
+      );
+      if (panel) {
+        for (const chip of panel.querySelectorAll<HTMLElement>(
+          "[data-shortcut]"
+        )) {
+          if (chip.dataset.shortcut?.toUpperCase() !== keys) continue;
+          const target = chip.closest<HTMLElement>("a, button");
+          if (target) return target;
+        }
+        return undefined;
+      }
+      return map.get(keys)?.target;
+    };
 
     let buffer = "";
     let timer: number | null = null;
@@ -60,7 +115,7 @@
       while (next.length && !prefixes.has(next)) next = next.slice(1);
       buffer = next;
 
-      const target = map.get(buffer);
+      const target = resolve(buffer);
       if (target) {
         reset();
         target.click();
@@ -71,10 +126,14 @@
       timer = window.setTimeout(reset, 1200);
     };
 
+    active = true;
     document.addEventListener("keydown", onKey);
     document.addEventListener(
       "astro:before-swap",
-      () => document.removeEventListener("keydown", onKey),
+      () => {
+        document.removeEventListener("keydown", onKey);
+        active = false;
+      },
       { once: true }
     );
   };

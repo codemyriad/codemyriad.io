@@ -4,6 +4,7 @@ import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import BlogCard from "@components/BlogCard.astro";
 import ContactSection from "@components/ContactSection.astro";
+import ServicesTabs from "@components/ServicesTabs.astro";
 // import { dateRange } from "@lib/utils";
 import {
   HOME,
@@ -53,21 +54,6 @@ const formatCounts = (c: { work: number; experiments: number }) => {
   return parts.join(" · ");
 };
 
-type ServiceEntry = {
-  collection: "services";
-  slug: string;
-  data: {
-    title: string;
-    description: string;
-    href?: string;
-    draft?: boolean;
-  };
-};
-
-const services = (
-  (await getCollection("services" as any)) as ServiceEntry[]
-).filter((service) => !service.data.draft);
-
 const blogTitleColors = ["#F4C45C", "#F4915C"];
 ---
 
@@ -83,52 +69,8 @@ const blogTitleColors = ["#F4C45C", "#F4915C"];
         </p>
       </section>
 
-      <section id="services" class="space-y-6">
-        <div class="grid sm:grid-cols-2 md:grid-cols-3">
-          <div
-            class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
-          >
-            <h2 class="text-xl font-medium text-[#FAFAFA]/50">
-              Areas of expertise
-            </h2>
-          </div>
-          {
-            services.map((service) => {
-              const Tag = service.data.href ? "a" : "div";
-              return (
-                <Tag
-                  href={service.data.href}
-                  class={`group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6${service.data.href ? " transition-colors duration-300 hover:bg-white/10" : ""}`}
-                >
-                  <div class="space-y-3">
-                    <h3 class="text-xl font-medium text-[#FAFAFA]">
-                      {service.data.title}
-                    </h3>
-                    <p class="text-base text-[#FAFAFA]/60">
-                      {service.data.description}
-                    </p>
-                  </div>
-                  {service.data.href && (
-                    <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
-                      <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          class="size-4 stroke-2"
-                          fill="none"
-                          stroke="currentColor"
-                        >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                      </span>
-                    </div>
-                  )}
-                </Tag>
-              );
-            })
-          }
-        </div>
+      <section id="services">
+        <ServicesTabs />
       </section>
 
       <section id="projects" class="space-y-6">

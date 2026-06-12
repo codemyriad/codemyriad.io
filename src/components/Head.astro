@@ -1,8 +1,10 @@
 ---
 import "../styles/global.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/jetbrains-mono/latin-500.css";
 import "@fontsource/jetbrains-mono/latin-600.css";
 import jetbrainsMono400 from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2";
+import jetbrainsMono500 from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2";
 import jetbrainsMono600 from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-600-normal.woff2";
 import { ViewTransitions } from "astro:transitions";
 
@@ -31,6 +33,13 @@ const { title, description, image = "/nano.png", noindex = false } = Astro.props
 <link
   rel="preload"
   href={jetbrainsMono400}
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+<link
+  rel="preload"
+  href={jetbrainsMono500}
   as="font"
   type="font/woff2"
   crossorigin

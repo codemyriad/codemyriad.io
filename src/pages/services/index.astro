@@ -1,6 +1,7 @@
 ---
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
+import ServicesTabs from "@components/ServicesTabs.astro";
 import { SERVICES } from "@consts";
 ---
 
@@ -10,25 +11,16 @@ import { SERVICES } from "@consts";
   breadcrumb={[{ label: "Services" }]}
 >
   <Container>
-    <div class="page-fade-in space-y-10 max-w-screen-xl mx-auto">
+    {/* max-w-screen-lg (not xl) so the list renders at the same measure as
+        the homepage instance — the v8 design's proportions assume it. */}
+    <div class="page-fade-in space-y-10 max-w-screen-lg mx-auto">
       <header class="space-y-3">
         <p class="text-base text-[#FAFAFA]/60">
           {SERVICES.DESCRIPTION}
         </p>
       </header>
 
-      <!-- TODO: full design pass. For now, a basic list of services. -->
-      <ul class="list-none p-0 space-y-3">
-        <li>
-          <a
-            href="/services/internal-tools"
-            class="inline-flex items-center gap-2 text-base text-[#7EC7FF] hover:text-[#FAFAFA] transition-colors"
-          >
-            <span>Internal Tools</span>
-            <span aria-hidden="true">→</span>
-          </a>
-        </li>
-      </ul>
+      <ServicesTabs />
     </div>
   </Container>
 </PageLayout>
