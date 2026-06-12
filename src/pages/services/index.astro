@@ -2,6 +2,7 @@
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import ServicesTabs from "@components/ServicesTabs.astro";
+import ContactSection from "@components/ContactSection.astro";
 import { SERVICES } from "@consts";
 ---
 
@@ -14,13 +15,8 @@ import { SERVICES } from "@consts";
     {/* max-w-screen-lg (not xl) so the list renders at the same measure as
         the homepage instance — the v8 design's proportions assume it. */}
     <div class="page-fade-in space-y-10 max-w-screen-lg mx-auto">
-      <header class="space-y-3">
-        <p class="text-base text-[#FAFAFA]/60">
-          {SERVICES.DESCRIPTION}
-        </p>
-      </header>
-
       <ServicesTabs />
+      <ContactSection />
     </div>
   </Container>
 </PageLayout>
