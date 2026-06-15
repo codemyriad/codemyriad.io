@@ -109,7 +109,27 @@ const services = defineCollection({
     description: z.string(),
     draft: z.boolean().optional(),
     href: z.string().optional(),
+    linkLabel: z.string().optional(), // copy for the expanded-row link to `href`
   }),
 });
 
-export const collections = { blog, projects, "case-studies": caseStudies, services };
+// Delivery principles shown on the "How we work" tab alongside services.
+// Kept separate from `services` so reference("services") stays semantically
+// clean (a principle is not a referenceable service offering).
+const howWeWork = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    draft: z.boolean().optional(),
+    note: z.string().optional(), // small-caps footer line in the expanded row
+  }),
+});
+
+export const collections = {
+  blog,
+  projects,
+  "case-studies": caseStudies,
+  services,
+  "how-we-work": howWeWork,
+};

@@ -1,0 +1,448 @@
+---
+// Tabbed editor list for Services / How we work (v8 design — see
+// planning/d-341-services-comms/). Used on the homepage #services section
+// and /services. One instance per page: element ids are fixed.
+//
+// Rows are native <details>/<summary> — closed by default (the open row in
+// the v8 mockup is a static view of the open state, not an initial state).
+// The `name` attribute gives native one-open-per-tab in Baseline-2024
+// browsers; older browsers simply allow multiple rows open.
+import { getCollection } from "astro:content";
+
+interface Props {
+  defaultTab?: "services" | "how-we-work";
+}
+
+const { defaultTab = "services" } = Astro.props;
+
+const serviceEntries = (await getCollection("services"))
+  .filter((entry) => !entry.data.draft)
+  .sort((a, b) => a.slug.localeCompare(b.slug));
+
+const howWeWorkEntries = (await getCollection("how-we-work"))
+  .filter((entry) => !entry.data.draft)
+  .sort((a, b) => a.slug.localeCompare(b.slug));
+
+const serviceItems = await Promise.all(
+  serviceEntries.map(async (entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    href: entry.data.href,
+    linkLabel: entry.data.linkLabel,
+    note: undefined as string | undefined,
+    Content: (await entry.render()).Content,
+  }))
+);
+
+const howWeWorkItems = await Promise.all(
+  howWeWorkEntries.map(async (entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    href: undefined as string | undefined,
+    linkLabel: undefined as string | undefined,
+    note: entry.data.note,
+    Content: (await entry.render()).Content,
+  }))
+);
+
+const tabs = [
+  { id: "services", label: "Services", key: "1", items: serviceItems },
+  { id: "how-we-work", label: "How we work", key: "2", items: howWeWorkItems },
+];
+---
+
+<div class="flex flex-col" data-services-tabs>
+  <h2 class="sr-only">Services and how we work</h2>
+
+  <div
+    role="tablist"
+    aria-label="Services and how we work"
+    class="flex border-b border-white/[0.12]"
+  >
+    {
+      tabs.map((tab) => {
+        const active = tab.id === defaultTab;
+        return (
+          <button
+            type="button"
+            role="tab"
+            id={`${tab.id}-tab`}
+            aria-selected={active ? "true" : "false"}
+            aria-controls={`${tab.id}-panel`}
+            aria-keyshortcuts={tab.key}
+            tabindex={active ? 0 : -1}
+            class:list={[
+              "group flex items-center gap-3 px-[22px] py-3 border-t-2 border-x border-b-0 transition-colors relative",
+              // /55 (not the artboard's /40): 14px medium on #0A0A0A needs
+              // ≥4.5:1 for WCAG AA — /40 computes to 3.66:1, /55 to 6:1.
+              "border-t-transparent border-x-transparent text-[#FAFAFA]/55 hover:text-[#FAFAFA]/80",
+              "aria-selected:border-t-[#7EC7FF] aria-selected:border-x-white/10 aria-selected:bg-[#7EC7FF]/[0.07] aria-selected:text-[#FAFAFA]",
+              "focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-[#7EC7FF]/60",
+            ]}
+          >
+            <span class="text-sm leading-[18px] font-medium">{tab.label}</span>
+            {/* Bespoke chip (not KbdChip): the v8 tab chips are larger and
+                accent-tinted when the tab is selected — state-driven styling
+                the shared chip doesn't model. `data-shortcut` keeps it wired
+                into the global KeyboardShortcuts handler. */}
+            <kbd
+              data-shortcut={tab.key}
+              aria-hidden="true"
+              class="hidden sm:inline-flex size-5 shrink-0 items-center justify-center rounded-sm border border-white/15 font-sans text-[11px] leading-[14px] text-[#FAFAFA]/55 transition-colors group-aria-selected:border-[#7EC7FF]/50 group-aria-selected:bg-[#7EC7FF]/[0.14] group-aria-selected:text-[#7EC7FF]"
+            >
+              {tab.key}
+            </kbd>
+          </button>
+        );
+      })
+    }
+  </div>
+
+  {
+    tabs.map((tab) => (
+      <div
+        role="tabpanel"
+        id={`${tab.id}-panel`}
+        aria-labelledby={`${tab.id}-tab`}
+        hidden={tab.id !== defaultTab}
+      >
+        {/* role=list: WebKit strips implicit list semantics from list-none */}
+        <ol role="list" class="list-none p-0 m-0 flex flex-col">
+          {tab.items.map((item, i) => (
+            <li>
+              <details
+                name={`cm-acc-${tab.id}`}
+                class:list={[
+                  "group relative border-t border-b border-white/[0.08] border-t-transparent",
+                  "open:border-t-[#7EC7FF]/[0.18] open:border-b-[#7EC7FF]/[0.18] open:bg-[#7EC7FF]/[0.06]",
+                  "before:absolute before:left-0 before:inset-y-0 before:w-[3px] before:bg-[#7EC7FF] before:opacity-0 open:before:opacity-100",
+                ]}
+              >
+                <summary class="flex transition-colors">
+                  {/* Mobile adaptations (deliberate deviations from the
+                      desktop-only v8 artboard): gutter 64px on mobile, index hidden
+                      (doesn't fit), title 20px, row padding 18px. */}
+                  <span
+                    class:list={[
+                      "flex items-baseline shrink-0 gap-2 border-r px-2.5 py-5 w-14 md:w-[84px] md:px-4",
+                      "border-white/[0.07] group-open:border-[#7EC7FF]/25 group-open:bg-[#7EC7FF]/[0.05]",
+                    ]}
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="cm-caret w-2 shrink-0 text-lg leading-4 text-[#FAFAFA]/25 group-open:text-[#7EC7FF] transition-colors"
+                    >
+                      <span class="group-open:hidden">▸</span>
+                      <span class="hidden group-open:inline">▾</span>
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      class="inline text-sm leading-4 tracking-[0.12em] text-[#FAFAFA]/30 group-open:font-medium group-open:text-[#7EC7FF]"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </span>
+                  <span
+                    class:list={[
+                      "flex grow basis-0 flex-col gap-2 py-5 pl-4 pr-4",
+                      "md:flex-row md:items-baseline md:gap-8 md:py-[22px] md:pl-7 md:pr-5",
+                    ]}
+                  >
+                    {/* Plain span, not a heading: headings inside <summary>
+                        (role button) confuse SR heading navigation. The
+                        section-level sr-only h2 carries the outline. */}
+                    <span class="cm-title shrink-0 text-xl md:text-[22px] leading-[1.3] font-medium text-[#FAFAFA]/85 md:basis-[330px] group-open:text-[#FAFAFA] transition-colors">
+                      {item.title}
+                    </span>
+                    <span class="grow basis-0 text-sm leading-[1.55] text-[#FAFAFA]/55 group-open:text-[#FAFAFA]/70">
+                      {item.description}
+                    </span>
+                  </span>
+                </summary>
+
+                <div class="flex">
+                  <span
+                    aria-hidden="true"
+                    class="w-14 shrink-0 border-r border-[#7EC7FF]/25 bg-[#7EC7FF]/[0.05] md:w-[84px]"
+                  />
+                  <div class="grow basis-0 flex md:gap-8 pb-5 pl-4 pr-4 md:pl-7 md:pr-5">
+                  <span aria-hidden="true" class="hidden md:block md:basis-[330px] shrink-0" />
+                  <div class="row-body min-w-0">
+                    <item.Content />
+                    {item.href && item.linkLabel && (
+                      <a
+                        href={item.href}
+                        class="group/link mt-4 inline-flex items-center gap-2.5 self-start"
+                      >
+                        <span class="border-b border-[#7EC7FF]/50 pb-0.5 text-[13px] leading-4 text-[#7EC7FF] transition-colors group-hover/link:border-[#7EC7FF] group-hover/link:text-[#FAFAFA]">
+                          {item.linkLabel}
+                        </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          class="size-3.5 shrink-0 stroke-2 text-[#7EC7FF] transition-colors group-hover/link:text-[#FAFAFA]"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </a>
+                    )}
+                    {item.note && (
+                      /* /55 (not the artboard's /35): informational copy at
+                         11px needs AA contrast — /35 computes to ~3.1:1. */
+                      <div class="mt-3.5 text-[11px] leading-[14px] tracking-widest uppercase text-[#FAFAFA]/55">
+                        {item.note}
+                      </div>
+                    )}
+                  </div>
+                  </div>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  /* Native disclosure affordances replaced by the gutter caret. */
+  summary {
+    @apply list-none cursor-pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details:not([open]) > summary:hover {
+    @apply bg-white/[0.07];
+  }
+  details:not([open]) > summary:hover .cm-title {
+    @apply text-[#FAFAFA];
+  }
+  details:not([open]) > summary:hover .cm-caret {
+    @apply text-[#FAFAFA]/65;
+  }
+
+  /* Suppress browser default focus ring on summary — we draw on details.
+     Both :focus and :focus-visible needed: UA fires :focus first, causing
+     a flash if only :focus-visible is suppressed. */
+  summary:focus,
+  summary:focus-visible {
+    @apply outline-none;
+  }
+
+  /* No flash: don't transition outline; scope to colour/bg only.
+     Tailwind transition-colors uses ease-in-out and includes outline —
+     both wrong here — so the transition is kept as raw CSS. */
+  details {
+    @apply outline-none;
+    transition: background-color 150ms ease-out, border-color 150ms ease-out;
+  }
+
+  /* :has() is Baseline 2023 — safe alongside <details name> (Baseline 2024). */
+  details:has(> summary:focus-visible) {
+    @apply outline outline-2 outline-[#FAFAFA]/55;
+  }
+
+  details:not([open]):has(> summary:focus-visible) > summary {
+    @apply bg-white/[0.04];
+  }
+
+  /* Expanded-row body copy comes from rendered markdown (<Content />), which
+     doesn't carry this component's scope hash — style it via :global. */
+  .row-body :global(p) {
+    @apply m-0 text-sm text-[#FAFAFA]/70;
+    line-height: 1.7; /* no Tailwind token for this value */
+  }
+  .row-body :global(p + p) {
+    @apply mt-3;
+  }
+  .row-body :global(a) {
+    @apply text-[#7EC7FF]/80 underline decoration-[#7EC7FF]/30 underline-offset-2 transition-colors hover:text-[#7EC7FF] hover:decoration-[#7EC7FF]/70;
+  }
+
+  /* Hold content visible while close animation runs (UA sets display:none on
+     details:not([open]) > :not(summary), which would cancel the animation). */
+  details.is-closing > :not(summary) {
+    display: block !important; /* !important not available via @apply in v3 */
+  }
+</style>
+
+<script>
+  // Tab switching per the WAI-ARIA APG tabs pattern: roving tabindex,
+  // Left/Right/Home/End with automatic activation (panel swap is a cheap
+  // display toggle). Same lifecycle conventions as the rest of the site:
+  // init-guard + astro:page-load re-init.
+  const init = () => {
+    document
+      .querySelectorAll<HTMLElement>("[data-services-tabs]")
+      .forEach((root) => {
+        if (root.dataset.initialized === "true") return;
+        root.dataset.initialized = "true";
+
+        const tabs = Array.from(
+          root.querySelectorAll<HTMLButtonElement>("[role='tab']")
+        );
+        const panels = Array.from(
+          root.querySelectorAll<HTMLElement>("[role='tabpanel']")
+        );
+
+        const select = (tab: HTMLButtonElement, focus = false) => {
+          tabs.forEach((t) => {
+            const active = t === tab;
+            t.setAttribute("aria-selected", active ? "true" : "false");
+            t.tabIndex = active ? 0 : -1;
+          });
+
+          const targetId = tab.getAttribute("aria-controls");
+
+          // Cancel any in-progress panel transitions so opacity is back at
+          // base before we measure state.
+          panels.forEach((p) => p.getAnimations().forEach((a) => a.cancel()));
+
+          const leaving = panels.find((p) => !p.hidden && p.id !== targetId);
+          const entering = panels.find((p) => p.id === targetId);
+
+          if (!entering) return;
+
+          // Only steal focus if it was in the panel we're about to hide.
+          const focusInLeaving = leaving
+            ? !!document.activeElement?.closest(`#${CSS.escape(leaving.id)}`)
+            : false;
+          if (focus || focusInLeaving) tab.focus();
+
+          if (!leaving) {
+            entering.hidden = false;
+            return;
+          }
+
+          leaving
+            .animate([{ opacity: 1 }, { opacity: 0 }], {
+              duration: 100,
+              easing: "ease-in",
+            })
+            .addEventListener("finish", () => {
+              leaving.hidden = true;
+              entering.hidden = false;
+              entering.animate([{ opacity: 0 }, { opacity: 1 }], {
+                duration: 180,
+                easing: "ease-out",
+              });
+            });
+        };
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => select(tab));
+          tab.addEventListener("keydown", (e) => {
+            // Don't hijack browser shortcuts (Alt/Cmd+Arrow = history nav).
+            if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+            const current = tabs.indexOf(tab);
+            let next: number | null = null;
+            if (e.key === "ArrowRight") next = (current + 1) % tabs.length;
+            else if (e.key === "ArrowLeft")
+              next = (current - 1 + tabs.length) % tabs.length;
+            else if (e.key === "Home") next = 0;
+            else if (e.key === "End") next = tabs.length - 1;
+            if (next === null) return;
+            e.preventDefault();
+            select(tabs[next], true);
+          });
+        });
+
+        // Accordion open/close animation.
+        // <details> snaps via display:none — can't be CSS-transitioned. We
+        // intercept click, prevent the native toggle, and drive height + opacity
+        // with Web Animations so open and close can run simultaneously.
+        //
+        // Easing: expo ease-out on open (snappy reveal), expo ease-in on close
+        // (quick collapse). Asymmetry matches the feel of opening vs dismissing.
+        const OPEN_OPTS = {
+          duration: 240,
+          easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+        };
+        const CLOSE_OPTS = {
+          duration: 180,
+          easing: "cubic-bezier(0.7, 0, 1, 1)",
+        };
+
+        const getBody = (det: HTMLDetailsElement) =>
+          det.querySelector<HTMLElement>(":scope > :not(summary)");
+
+        const animOpen = (det: HTMLDetailsElement) => {
+          const body = getBody(det);
+          if (!body) return;
+          // Set open first so scrollHeight is measurable, then clamp to 0
+          // before the browser paints (same synchronous task).
+          det.open = true;
+          const h = body.scrollHeight;
+          body.style.overflow = "hidden";
+          body.style.height = "0px";
+          body
+            .animate(
+              [
+                { height: "0px", opacity: "0" },
+                { height: h + "px", opacity: "1" },
+              ],
+              OPEN_OPTS
+            )
+            .addEventListener("finish", () => {
+              body.style.height = "";
+              body.style.overflow = "";
+            });
+        };
+
+        const animClose = (det: HTMLDetailsElement) => {
+          const body = getBody(det);
+          if (!body) {
+            det.open = false;
+            return;
+          }
+          const h = body.scrollHeight;
+          body.style.overflow = "hidden";
+          // .is-closing keeps content display:block while UA would set
+          // display:none after open attribute is removed.
+          det.classList.add("is-closing");
+          det.open = false;
+          body
+            .animate(
+              [
+                { height: h + "px", opacity: "1" },
+                { height: "0px", opacity: "0" },
+              ],
+              CLOSE_OPTS
+            )
+            .addEventListener("finish", () => {
+              det.classList.remove("is-closing");
+              body.style.overflow = "";
+            });
+        };
+
+        const detailsList = Array.from(
+          root.querySelectorAll<HTMLDetailsElement>("details[name]")
+        );
+
+        detailsList.forEach((det) => {
+          det.querySelector("summary")?.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (det.open) {
+              animClose(det);
+            } else {
+              // Close any open peer in the same name-group simultaneously.
+              const peer = detailsList.find(
+                (d) => d !== det && d.open && d.name === det.name
+              );
+              if (peer) animClose(peer);
+              animOpen(det);
+            }
+          });
+        });
+      });
+  };
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>
