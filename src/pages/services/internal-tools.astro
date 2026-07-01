@@ -25,16 +25,16 @@ const getPost = (slug: string) => blogMap[slug];
 
       <!-- Page header -->
       <section class="space-y-3">
-        <h1 data-typeout class="text-6xl font-bold leading-tight text-[#FAFAFA]">
+        <h1 data-typeout class="text-6xl font-bold leading-tight text-base-content">
           Internal Tools
         </h1>
-        <p data-typeout class="text-base text-[#7EC7FF]">Automation · Reporting · Client Portals · Dashboards</p>
+        <p data-typeout class="text-base text-primary">Automation · Reporting · Client Portals · Dashboards</p>
       </section>
 
       <!-- Problem statement -->
       <section data-fade class="grid gap-x-12 md:grid-cols-6">
         <div class="space-y-5 md:col-span-4">
-          <h2 class="text-2xl font-medium leading-snug text-[#FAFAFA]">
+          <h2 class="text-2xl font-medium leading-snug text-base-content">
             Are the spreadsheets that built your business starting to slow you down?
           </h2>
           <p class="text-base leading-relaxed text-body">
@@ -48,7 +48,7 @@ const getPost = (slug: string) => blogMap[slug];
 
       <!-- Workflow Automation -->
       <section data-fade class="space-y-6">
-        <h3 class="text-2xl font-medium text-[#FAFAFA]">Workflow Automation</h3>
+        <h3 class="text-2xl font-medium text-base-content">Workflow Automation</h3>
         <div class="grid gap-x-12 gap-y-8 items-start md:grid-cols-6">
           <div class="space-y-5 md:col-span-4">
             <p class="text-base leading-relaxed text-body">
@@ -69,7 +69,7 @@ const getPost = (slug: string) => blogMap[slug];
                   title={getPost("manual-process-cost")!.data.title}
                   date={getPost("manual-process-cost")!.data.date}
                   author={getPost("manual-process-cost")!.data.author}
-                  titleColor="#F4C45C"
+                  titleColor="var(--color-accent)"
                   label="Read also"
                 />
               </div>
@@ -80,7 +80,7 @@ const getPost = (slug: string) => blogMap[slug];
 
       <!-- Owned Tools -->
       <section data-fade class="space-y-6">
-        <h3 class="text-2xl font-medium text-[#FAFAFA]">Owned Tools</h3>
+        <h3 class="text-2xl font-medium text-base-content">Owned Tools</h3>
         <div class="grid gap-x-12 gap-y-8 items-start md:grid-cols-6">
           <div class="space-y-5 md:col-span-4">
             <p class="text-base leading-relaxed text-body">
@@ -101,7 +101,7 @@ const getPost = (slug: string) => blogMap[slug];
                   title={getPost("saas-subscription-worth-it")!.data.title}
                   date={getPost("saas-subscription-worth-it")!.data.date}
                   author={getPost("saas-subscription-worth-it")!.data.author}
-                  titleColor="#F4915C"
+                  titleColor="var(--color-warning)"
                   label="Read also"
                 />
               </div>
@@ -112,16 +112,16 @@ const getPost = (slug: string) => blogMap[slug];
 
       <!-- Case Studies -->
       <section class="space-y-16">
-        <div class="border-t border-white/10 pt-4">
-        <h1 data-typeout class="text-base font-medium text-[#FAFAFA]/40">/ Case Studies</h1>
+        <div class="border-t border-base-300 pt-4">
+        <h1 data-typeout class="text-base font-medium text-base-content/40">/ Case Studies</h1>
         </div>
 
         <!-- Case study 1: Sales Demo Tool — no blog card -->
         <div data-fade class="space-y-6 pb-4">
           <div class="flex flex-col items-baseline gap-1.5">
-            <h3 class="text-3xl font-medium text-[#FAFAFA]">Sales Demo Tool</h3>
+            <h3 class="text-3xl font-medium text-base-content">Sales Demo Tool</h3>
             <span class="text-base text-body/40">
-              Client / <a href="https://whatisedible.com/" target="blank" class="text-[#7EC7FF] hover:text-[#7EC7FF]/80">Edible</a>
+              Client / <a href="https://whatisedible.com/" target="blank" class="text-primary underline-offset-2 hover:underline hover:decoration-primary">Edible</a>
             </span>
           </div>
           <VideoPlayer src="/videos/sales-tool-demo.webm" />
@@ -146,9 +146,9 @@ const getPost = (slug: string) => blogMap[slug];
         <!-- Case study 2: Property Rental Reports / Aire Spaces — with blog card -->
         <div data-fade class="space-y-6">
           <div class="flex flex-col items-baseline gap-1.5">
-            <h3 class="text-3xl font-medium text-[#FAFAFA]">Property Rental Reports</h3>
+            <h3 class="text-3xl font-medium text-base-content">Property Rental Reports</h3>
             <span class="text-base text-body/40">
-              Client / <a href="https://airespaces.co.uk/" target="blank" class="text-[#7EC7FF] hover:text-[#7EC7FF]/80">Aire Spaces</a>
+              Client / <a href="https://airespaces.co.uk/" target="blank" class="text-primary underline-offset-2 hover:underline hover:decoration-primary">Aire Spaces</a>
             </span>
           </div>
           <VideoPlayer src="/videos/property-report.webm" />

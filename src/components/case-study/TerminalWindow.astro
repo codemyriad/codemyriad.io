@@ -65,7 +65,7 @@ const {
     box-shadow:
       0 0 0 2px #1a1a1a,
       0 0 0 4px ${accent},
-      0 0 0 6px #0a0a0a,
+      0 0 0 6px hsl(var(--b1)),
       0 0 0 8px #1a1a1a,
       4px 4px 0 8px rgba(0,0,0,0.8),
       8px 8px 0 8px rgba(0,0,0,0.4);
@@ -83,7 +83,7 @@ const {
   <header
     data-window-titlebar
     class="terminal-titlebar flex items-center justify-between gap-2 px-1.5 py-1.5 cursor-grab select-none"
-    style={`background: #0a0a0a; border-bottom: 2px solid ${accent};`}
+    style={`background: hsl(var(--b1)); border-bottom: 2px solid ${accent};`}
   >
     <div class="flex items-center gap-2 min-w-0">
       <Terminal size={14} color={accent} />
@@ -147,7 +147,7 @@ const {
       )}
 
       {title && (
-        <div class="mb-4 pb-3 border-b border-white/10">
+        <div class="mb-4 pb-3 border-b border-base-300">
           <span
             class="font-mono font-bold uppercase tracking-[0.05em] text-[13px]"
             style={`color: ${accent};`}
@@ -164,7 +164,7 @@ const {
       <!-- End-of-content marker. Standard chrome for every window — signals
            you've reached the bottom and reminds how to close. -->
       <div
-        class="not-prose mt-12 pt-6 border-white/10 flex justify-start items-start gap-2 font-mono text-[10px] uppercase tracking-widest text-[#FAFAFA]/45"
+        class="not-prose mt-12 pt-6 border-base-300 flex justify-start items-start gap-2 font-mono text-[10px] uppercase tracking-widest text-base-content/45"
       >
         <KbdChip keys="Esc" text />
         <span>to close this window</span>
@@ -177,7 +177,7 @@ const {
 <style>
   .terminal-window {
     transform-origin: top left;
-    background: #0A0A0A;
+    background: hsl(var(--b1));
   }
 
   /* Open animation — mirrors the framer-motion spring (stiffness 320, damping 26)
@@ -262,8 +262,8 @@ const {
 
   /* Body palette — site colors with mono font */
   .terminal-body {
-    background: #0A0A0A;
-    color: #FAFAFA;
+    background: hsl(var(--b1));
+    color: hsl(var(--bc));
     font-family: "JetBrains Mono", "Courier New", Courier, monospace;
     line-height: 1.65;
   }

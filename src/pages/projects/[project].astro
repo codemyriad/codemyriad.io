@@ -108,7 +108,7 @@ clickableStudies.forEach((cs, idx) => {
       <section class="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-10 md:gap-12 items-start">
         <div class="space-y-6">
           <div class="space-y-3">
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-[#FAFAFA]">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-base-content">
               {client}
             </h1>
           </div>
@@ -120,16 +120,16 @@ clickableStudies.forEach((cs, idx) => {
         </div>
 
         {META_ROWS.length > 0 && (
-          <aside class="border border-white/10 divide-y divide-white/10 self-start">
+          <aside class="border border-base-300 divide-y divide-base-300 self-start">
             {META_ROWS.map((row) => (
               <div class="flex justify-between items-start px-4 py-3 gap-4">
-                <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 shrink-0 pt-0.5">
+                <span class="text-[10px] uppercase tracking-widest text-base-content/40 shrink-0 pt-0.5">
                   {row.label}
                 </span>
                 {Array.isArray(row.value) ? (
                   <div class="flex flex-wrap gap-1.5 justify-end">
                     {row.value.map((tag) => (
-                      <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+                      <span class="badge text-base-content/60">
                         {tag}
                       </span>
                     ))}
@@ -139,7 +139,7 @@ clickableStudies.forEach((cs, idx) => {
                     href={row.href}
                     target="_blank"
                     rel="noreferrer"
-                    class="text-xs text-[#7EC7FF] hover:text-[#7EC7FF]/80 truncate text-right"
+                    class="text-xs text-primary underline-offset-2 truncate text-right hover:underline hover:decoration-primary"
                   >
                     {row.value.replace(/^https?:\/\//, "")}
                   </a>
@@ -155,17 +155,17 @@ clickableStudies.forEach((cs, idx) => {
       {sortedStudies.length > 0 && (
         <section>
           <div class="flex items-center justify-between mb-6">
-            <span class="text-xs uppercase tracking-[0.2em] text-[#FAFAFA]/40">Case Studies</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-base-content/40">Case Studies</span>
           </div>
           <ul class="list-none p-0">
             {sortedStudies.map((cs) => {
               const slug = studySlug(cs);
-              const accent = cs.data.type === "experiment" ? "#F4915C" : "#7EC7FF";
+              const accent = cs.data.type === "experiment" ? "var(--color-warning)" : "var(--color-primary)";
               const canonical = `/projects/${projectSlug}/${slug}`;
               const interactive = cs.data.writeUp !== false;
               return (
                 <li
-                  class={`case-study-card group relative flex items-start w-full border border-white/10 bg-white/5 transition duration-180 ease-in-out mb-4 overflow-clip ${interactive ? "hover:bg-white/10" : ""}`}
+                  class={`case-study-card group relative flex items-start w-full border border-base-300 bg-white/5 transition duration-180 ease-in-out mb-4 overflow-clip ${interactive ? "hover:bg-white/10" : ""}`}
                 >
                   {cs.data.writeUp !== false ? (
                     <a
@@ -184,13 +184,13 @@ clickableStudies.forEach((cs, idx) => {
                       <div class="flex-grow space-y-3 min-w-0">
                         <div class="flex flex-wrap items-center gap-3">
                           <h3
-                            class="text-lg font-bold text-[#FAFAFA]"
+                            class="text-lg font-bold text-base-content"
                             style={`text-decoration-color: ${accent};`}
                           >
                             {cs.data.title}
                           </h3>
                           {cs.data.tags && cs.data.tags.length > 0 && cs.data.tags.map((tag: string) => (
-                            <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+                            <span class="badge text-base-content/60">
                               {tag}
                             </span>
                           ))}
@@ -228,9 +228,9 @@ clickableStudies.forEach((cs, idx) => {
                       <!-- Title + description -->
                       <div class="flex-grow space-y-3 min-w-0">
                         <div class="flex flex-wrap items-center gap-3">
-                          <h3 class="text-lg font-bold text-[#FAFAFA]">{cs.data.title}</h3>
+                          <h3 class="text-lg font-bold text-base-content">{cs.data.title}</h3>
                           {cs.data.tags && cs.data.tags.length > 0 && cs.data.tags.map((tag: string) => (
-                            <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+                            <span class="badge text-base-content/60">
                               {tag}
                             </span>
                           ))}
@@ -243,7 +243,7 @@ clickableStudies.forEach((cs, idx) => {
                       <!-- Non-clickable status note (no pulsing dot — this
                            card isn't "live" yet). -->
                       <div class="shrink-0 pt-1 md:text-right">
-                        <span class="text-xs text-[#FAFAFA]/40 italic">
+                        <span class="text-xs text-base-content/40 italic">
                           {cs.data.ctaLabel ?? "In progress"}
                         </span>
                       </div>
@@ -269,7 +269,7 @@ clickableStudies.forEach((cs, idx) => {
     .map((cs) => {
       const slug = studySlug(cs);
       const studyWindowSlug = cs.slug.split("/").slice(-1)[0];
-      const accent = cs.data.type === "experiment" ? "#F4915C" : "#7EC7FF";
+      const accent = cs.data.type === "experiment" ? "var(--color-warning)" : "var(--color-primary)";
       const accentDim = cs.data.type === "experiment" ? "#5a3a22" : "#2a4a6a";
       const filename = `${studyWindowSlug.replace(/-/g, "_")}.log`;
       const statusLabel =
@@ -298,7 +298,7 @@ clickableStudies.forEach((cs, idx) => {
        real thing during refinement. -->
   <TerminalWindow
     slug="components-reference"
-    accent="#C792EA"
+    accent="var(--color-secondary)"
     accentDim="#4a2e6a"
     filename="components_reference.log"
     popoutHref="/lab/case-study-components"

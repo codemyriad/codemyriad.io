@@ -36,7 +36,7 @@ const relatedEntries = related && related.length > 0 ? await getEntries(related)
 
 <div class="case-study-content space-y-10">
   {media && (
-    <div class="case-study-media border border-white/10 overflow-hidden">
+    <div class="case-study-media border border-base-300 overflow-hidden">
       {media.type === "image" ? (
         <img
           src={media.src}
@@ -60,13 +60,13 @@ const relatedEntries = related && related.length > 0 ? await getEntries(related)
 
   {showHeader && (
     <header class="space-y-4">
-      <h1 class={fullPage ? "text-4xl md:text-5xl font-bold text-[#FAFAFA] leading-tight" : "text-2xl md:text-3xl font-bold text-[#FAFAFA] leading-tight"}>
+      <h1 class={fullPage ? "text-4xl md:text-5xl font-bold text-base-content leading-tight" : "text-2xl md:text-3xl font-bold text-base-content leading-tight"}>
         {title}
       </h1>
       {tags && tags.length > 0 && (
         <div class="flex flex-wrap items-center gap-3">
           {tags.map((tag) => (
-            <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/60">
+            <span class="badge text-base-content/60">
               {tag}
             </span>
           ))}
@@ -90,8 +90,8 @@ const relatedEntries = related && related.length > 0 ? await getEntries(related)
   )}
 
   {fullPage && relatedEntries.length > 0 && (
-    <section class="space-y-6 border-t border-white/10 pt-10">
-      <span class="text-[10px] uppercase tracking-widest text-[#FAFAFA]/40 block">
+    <section class="space-y-6 border-t border-base-300 pt-10">
+      <span class="text-[10px] uppercase tracking-widest text-base-content/40 block">
         Related reading
       </span>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -101,7 +101,7 @@ const relatedEntries = related && related.length > 0 ? await getEntries(related)
             title={post.data.title}
             date={post.data.date}
             author={post.data.author}
-            titleColor="#F4C45C"
+            titleColor="var(--color-accent)"
             label="Read also"
           />
         ))}

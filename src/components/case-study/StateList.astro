@@ -22,10 +22,10 @@ const {
   class: className = "",
 } = Astro.props;
 
-const accentColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
+const accentColor = accent === "amber" ? "var(--color-warning)" : "var(--color-primary)";
 ---
 
-<div class={`not-prose bg-white/5 border border-white/10 p-4 ${className}`}>
+<div class={`not-prose bg-white/5 border border-base-300 p-4 ${className}`}>
   <h4
     class="text-base font-bold mb-3 flex items-center gap-2"
     style={`color: ${accentColor};`}

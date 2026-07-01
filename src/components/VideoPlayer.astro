@@ -13,7 +13,7 @@ const { src, type = "video/webm" } = Astro.props;
 
   <!-- Overlay button — always visible, icon swaps between play/pause -->
   <div class="video-overlay absolute inset-0 flex items-center justify-center transition-opacity duration-200">
-    <div class="flex items-center justify-center w-20 h-20 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm transition-all duration-200 group-hover:bg-black/60">
+    <div class="flex items-center justify-center w-20 h-20 rounded-full border border-base-content/20 bg-black/40 backdrop-blur-sm transition-all duration-200 group-hover:bg-black/60">
       <!-- Play icon -->
       <svg
         class="video-icon-play w-7 h-7 fill-white ml-1"

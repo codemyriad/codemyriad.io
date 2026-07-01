@@ -27,10 +27,10 @@ const chars = keys.toUpperCase().split("");
   ]}
 >
   {text ? (
-    <span class="inline-flex items-center justify-center h-3.5 px-1 font-sans text-[10px] leading-[13px] border border-white/15 bg-white/10 text-[#FAFAFA]/70 transition-colors">{keys}</span>
+    <span class="inline-flex items-center justify-center h-3.5 px-1 font-sans text-[10px] leading-[13px] border border-base-300 bg-white/10 text-base-content/70 transition-colors">{keys}</span>
   ) : (
     chars.map((ch) => (
-      <span class="inline-flex items-center justify-center w-3.5 h-3.5 font-sans text-[10px] leading-[13px] uppercase border border-white/15 bg-white/10 text-[#FAFAFA]/70 transition-colors">{ch}</span>
+      <span class="inline-flex items-center justify-center w-3.5 h-3.5 font-sans text-[10px] leading-[13px] uppercase border border-base-300 bg-white/10 text-base-content/70 transition-colors">{ch}</span>
     ))
   )}
 </kbd>

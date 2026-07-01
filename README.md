@@ -2,6 +2,14 @@ Astro Nano is a static, minimalist, lightweight, lightning fast portfolio and bl
 
 Built with Astro, Tailwind and Typescript, an no frameworks.
 
+## 🎨 Design system
+
+The brand is one shared file — `design/theme.mjs` (the DaisyUI `codemyriad` theme
++ JetBrains Mono) — imported by `tailwind.config.mjs`. This repo is the source of
+truth; the private [proposals](https://github.com/codemyriad/proposals) repo
+vendors a byte-identical copy. See **[DESIGN.md](./DESIGN.md)**. Agent notes:
+[CLAUDE.md](./CLAUDE.md).
+
 ## 📄 Configuration
 
 The blog posts on the demo serve as the documentation and configuration.

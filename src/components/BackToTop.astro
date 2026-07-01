@@ -1,18 +1,15 @@
+---
+import { ArrowUp } from "@lucide/astro";
+---
+
 <button
   id="back-to-top"
   data-visible="false"
-  class="group hidden sm:flex fixed bottom-4 right-[50px] z-40 items-center h-7 pl-8 pr-2 py-1 flex-nowrap border border-white/20 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto hover:data-[visible=true]:opacity-50 transition-all duration-300 ease-in-out hover:bg-white/10 hover:border-white/30 hover:text-[#FAFAFA]"
+  class="btn btn-outline btn-xs h-7 min-h-7 hidden sm:inline-flex fixed bottom-4 right-[50px] z-40 gap-1.5 backdrop-blur-sm bg-black/40 opacity-0 pointer-events-none data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto transition-all duration-300 ease-in-out"
   aria-label="Back to top"
 >
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    class="absolute top-1/2 left-2 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current rotate-90"
-  >
-    <line x1="5" y1="12" x2="19" y2="12" class="translate-x-2 group-hover:translate-x-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-in-out" />
-    <polyline points="12 5 5 12 12 19" class="translate-x-1 group-hover:translate-x-0 transition-transform duration-300 ease-in-out" />
-  </svg>
-  <span class="text-xs">Back to top</span>
+  <ArrowUp size={12} />
+  <span>Back to top</span>
 </button>
 
 <script>

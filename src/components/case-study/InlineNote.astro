@@ -9,8 +9,8 @@ type Props = {
 const { class: className = "" } = Astro.props;
 ---
 
-<div class={`not-prose p-4 bg-white/5 border-l-2 border-white/25 ${className}`}>
-  <p class="text-sm italic text-[#FAFAFA] leading-relaxed max-w-2xl">
+<div class={`not-prose p-4 bg-white/5 border-l-2 border-base-content/25 ${className}`}>
+  <p class="text-sm italic text-base-content leading-relaxed max-w-2xl">
     <slot />
   </p>
 </div>
