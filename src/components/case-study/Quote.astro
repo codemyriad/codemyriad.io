@@ -13,19 +13,19 @@ const {
   class: className = "",
 } = Astro.props;
 
-const borderColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
+const borderColor = accent === "amber" ? "var(--color-warning)" : "var(--color-primary)";
 const textSize = size === "large" ? "text-2xl md:text-4xl" : "text-xl md:text-2xl";
 ---
 
 <div
-  class={`bg-white/5 border-y border-r border-white/10 border-l-2 p-4 md:p-8 ${className}`}
+  class={`bg-white/5 border-y border-r border-base-300 border-l-2 p-4 md:p-8 ${className}`}
   style={`border-left-color: ${borderColor};`}
 >
-  <blockquote class={`${textSize} italic leading-tight mb-3 text-[#FAFAFA]`}>
+  <blockquote class={`${textSize} italic leading-tight mb-3 text-base-content`}>
     <slot />
   </blockquote>
   {attribution && (
-    <cite class="text-sm text-[#FAFAFA]/80 not-italic">
+    <cite class="text-sm text-base-content/80 not-italic">
       — {attribution}
     </cite>
   )}

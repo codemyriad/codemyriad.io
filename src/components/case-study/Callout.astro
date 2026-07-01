@@ -16,12 +16,12 @@ type Props = {
 
 const { title, icon: Icon, accent = "teal", class: className = "" } = Astro.props;
 
-const accentColor = accent === "amber" ? "#F4915C" : "#7EC7FF";
+const accentColor = accent === "amber" ? "var(--color-warning)" : "var(--color-primary)";
 ---
 
-<div class={`not-prose border border-white/10 p-4 bg-white/5 ${className}`}>
+<div class={`not-prose border border-base-300 p-4 bg-white/5 ${className}`}>
   <h4
-    class="text-sm uppercase tracking-[0.2em] font-bold mb-3 flex items-center gap-3 text-[#FAFAFA]"
+    class="text-sm uppercase tracking-[0.2em] font-bold mb-3 flex items-center gap-3 text-base-content"
   >
     {Icon && <Icon size={14} color={accentColor} />}
     <span>{title}</span>

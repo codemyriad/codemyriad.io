@@ -4,6 +4,7 @@ import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
 import KbdChip from "@components/KbdChip.astro";
 import { PROJECTS } from "@consts";
+import { ArrowRight } from "@lucide/astro";
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
@@ -72,7 +73,7 @@ for (const project of projects) {
   <Container>
     <div class="page-fade-in space-y-10 max-w-screen-xl mx-auto">
       <header class="space-y-3">
-        <p class="text-base text-[#FAFAFA]/60">
+        <p class="text-base text-base-content/60">
           A selection of client work and personal projects.
         </p>
       </header>
@@ -88,7 +89,7 @@ for (const project of projects) {
               <li>
                 <a
                   href={`/projects/${project.slug}`}
-                  class="project-card group relative overflow-hidden flex h-72 flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
+                  class="project-card group relative overflow-hidden flex h-72 flex-col justify-between border border-base-300 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
                 >
                   {shortcut && (
                     <KbdChip
@@ -97,24 +98,24 @@ for (const project of projects) {
                     />
                   )}
                   <div class="relative z-10 space-y-3 pr-16">
-                    <h2 class="text-2xl font-semibold text-[#FAFAFA]">
+                    <h2 class="text-2xl font-semibold text-base-content">
                       {project.data.client ?? project.data.title}
                     </h2>
                     {project.data.tagline && (
-                      <p class="text-sm text-[#7EC7FF]/80">
+                      <p class="text-sm text-primary/80">
                         {project.data.tagline}
                       </p>
                     )}
                     {counts.total > 0 && (
-                      <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-[#FAFAFA]/50">
+                      <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-base-content/50">
                         <span class="relative w-2 h-2 inline-block">
                           <span
                             class="absolute inset-0 rounded-full animate-ping opacity-60"
-                            style="background: #7EC7FF;"
+                            style="background: var(--color-primary);"
                           />
                           <span
                             class="relative block w-2 h-2 rounded-full"
-                            style="background: #7EC7FF;"
+                            style="background: var(--color-primary);"
                           />
                         </span>
                         <span>{countsLabel}</span>
@@ -124,22 +125,13 @@ for (const project of projects) {
                   <div class="relative z-10 mt-6 flex items-end justify-between gap-4">
                     <div class="flex flex-wrap gap-1.5">
                       {tags.slice(0, 3).map((tag: string) => (
-                        <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest border border-white/10 text-[#FAFAFA]/50">
+                        <span class="badge text-base-content/50">
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <span class="inline-flex size-8 items-center justify-center border border-white/10 bg-white/5 shrink-0 text-[#FAFAFA]/60 group-hover:text-[#FAFAFA] transition-colors">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        class="size-4 stroke-2"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
+                    <span class="inline-flex size-8 shrink-0 items-center justify-center border border-base-300 text-base-content transition-colors group-hover:border-base-content/40">
+                      <ArrowRight size={14} />
                     </span>
                   </div>
                 </a>

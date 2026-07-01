@@ -17,12 +17,12 @@ const cols =
 ---
 
 {metrics.length > 0 && (
-  <section class={`grid grid-cols-1 ${cols} border border-white/10 bg-white/5 ${className}`}>
+  <section class={`grid grid-cols-1 ${cols} border border-base-300 bg-white/5 ${className}`}>
     {metrics.map((metric, idx) => (
       <div
-        class={`p-6 ${idx !== metrics.length - 1 ? "md:border-r border-b md:border-b-0 border-white/10" : ""}`}
+        class={`p-6 ${idx !== metrics.length - 1 ? "md:border-r border-b md:border-b-0 border-base-300" : ""}`}
       >
-        <div class="text-3xl font-bold mb-4 text-[#FAFAFA]">{metric.value}</div>
+        <div class="text-3xl font-bold mb-4 text-base-content">{metric.value}</div>
         <div class="text-sm text-white/60">
           {metric.label}
         </div>

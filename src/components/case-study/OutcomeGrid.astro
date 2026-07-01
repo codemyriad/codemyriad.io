@@ -28,11 +28,11 @@ const labelFor = (i: number) =>
 {outcomes.length > 0 && (
   <section
     data-outcomes
-    class={`not-prose grid grid-cols-1 md:grid-cols-[1fr_5fr] gap-3 md:gap-6 border-t border-white/10 pt-6 ${className}`}
+    class={`not-prose grid grid-cols-1 md:grid-cols-[1fr_5fr] gap-3 md:gap-6 border-t border-base-300 pt-6 ${className}`}
   >
     <div>
       <div class="outcomes-label-sticky md:sticky">
-        <span class="text-xs uppercase tracking-widest text-[#FAFAFA]/80 block pt-5">
+        <span class="text-xs uppercase tracking-widest text-base-content/80 block pt-5">
           Outcomes
         </span>
       </div>
@@ -40,18 +40,18 @@ const labelFor = (i: number) =>
 
     <div class="space-y-6">
       {heading && (
-        <h2 class="!mt-0 text-2xl md:text-3xl font-bold leading-tight text-[#FAFAFA]">
+        <h2 class="!mt-0 text-2xl md:text-3xl font-bold leading-tight text-base-content">
           {heading}
         </h2>
       )}
-      <ul class="list-none p-0 m-0 divide-y divide-white/10 border-b border-white/10">
+      <ul class="list-none p-0 m-0 divide-y divide-base-300 border-b border-base-300">
         {outcomes.map((outcome, idx) => (
           <li class="grid grid-cols-[3rem_1fr] gap-6 py-4">
-            <span class="font-mono text-xs uppercase tracking-widest text-[#FAFAFA]/60 pt-0.5">
+            <span class="font-mono text-xs uppercase tracking-widest text-base-content/60 pt-0.5">
               {labelFor(idx)}
             </span>
             <div>
-              <h4 class="text-[#FAFAFA] text-sm font-bold mb-2">
+              <h4 class="text-base-content text-sm font-bold mb-2">
                 {outcome.title}
               </h4>
               <p class="text-body text-sm leading-relaxed">

@@ -6,6 +6,7 @@ import BlogCard from "@components/BlogCard.astro";
 import ContactSection from "@components/ContactSection.astro";
 import ServicesTabs from "@components/ServicesTabs.astro";
 // import { dateRange } from "@lib/utils";
+import { ArrowRight } from "@lucide/astro";
 import {
   HOME,
   //LINKS
@@ -54,17 +55,17 @@ const formatCounts = (c: { work: number; experiments: number }) => {
   return parts.join(" · ");
 };
 
-const blogTitleColors = ["#F4C45C", "#F4915C"];
+const blogTitleColors = ["var(--color-accent)", "var(--color-warning)"];
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
     <div class="space-y-20 max-w-screen-lg mx-auto">
       <section id="hero" class="space-y-3">
-        <h1 class="text-4xl font-bold leading-tight text-[#FAFAFA]">
+        <h1 class="text-4xl font-bold leading-tight text-base-content">
           Operational systems for growing companies.
         </h1>
-        <p class="text-lg text-[#7EC7FF]">
+        <p class="text-lg text-primary">
           We build the connective tissue between tools, teams, and workflows.
         </p>
       </section>
@@ -76,9 +77,9 @@ const blogTitleColors = ["#F4C45C", "#F4915C"];
       <section id="projects" class="space-y-6">
         <div class="grid sm:grid-cols-2 md:grid-cols-3">
           <div
-            class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
+            class="flex min-h-[170px] flex-col justify-between border border-base-300 p-6"
           >
-            <h2 class="text-xl font-medium text-[#FAFAFA]/50">Projects</h2>
+            <h2 class="text-xl font-medium text-base-content/50">Projects</h2>
           </div>
           {
             projects.map((project) => {
@@ -87,43 +88,34 @@ const blogTitleColors = ["#F4C45C", "#F4915C"];
               return (
               <a
                 href={`/${project.collection}/${project.slug}`}
-                class="group flex min-h-[170px] flex-col justify-between border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
+                class="group flex min-h-[170px] flex-col justify-between border border-base-300 bg-white/5 p-6 transition-colors duration-300 hover:bg-white/10"
               >
                 <div class="space-y-3">
-                  <h3 class="text-xl font-medium text-[#FAFAFA]">
+                  <h3 class="text-xl font-medium text-base-content">
                     {project.data.client ?? project.data.title}
                   </h3>
-                  <p class="text-base text-[#FAFAFA]/60">
+                  <p class="text-base text-base-content/60">
                     {project.data.description}
                   </p>
                   {counts.total > 0 && (
-                    <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-[#FAFAFA]/50">
+                    <div class="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-base-content/50">
                       <span class="relative w-2 h-2 inline-block">
                         <span
                           class="absolute inset-0 rounded-full animate-ping opacity-60"
-                          style="background: #7EC7FF;"
+                          style="background: var(--color-primary);"
                         />
                         <span
                           class="relative block w-2 h-2 rounded-full"
-                          style="background: #7EC7FF;"
+                          style="background: var(--color-primary);"
                         />
                       </span>
                       <span>{countsLabel}</span>
                     </div>
                   )}
                 </div>
-                <div class="mt-6 flex items-center justify-end text-[#FAFAFA]/60 transition-colors duration-300 group-hover:text-[#FAFAFA]">
-                  <span class="inline-flex size-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="size-4 stroke-2"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
+                <div class="mt-6 flex items-center justify-end">
+                  <span class="inline-flex size-8 shrink-0 items-center justify-center border border-base-300 text-base-content transition-colors group-hover:border-base-content/40">
+                    <ArrowRight size={14} />
                   </span>
                 </div>
               </a>
@@ -136,10 +128,10 @@ const blogTitleColors = ["#F4C45C", "#F4915C"];
       <section id="blog" class="space-y-6">
         <div class="grid sm:grid-cols-2 md:grid-cols-3">
           <div
-            class="flex min-h-[170px] flex-col justify-between border border-white/10 p-6"
+            class="flex min-h-[170px] flex-col justify-between border border-base-300 p-6"
           >
-            <h2 class="text-xl font-medium text-[#FAFAFA]/50">Blog</h2>
-            <a href="/blog" class="group inline-flex items-center gap-2 text-sm text-[#FAFAFA]/40 hover:text-[#FAFAFA] transition-colors duration-300">
+            <h2 class="text-xl font-medium text-base-content/50">Blog</h2>
+            <a href="/blog" class="group inline-flex items-center gap-2 text-sm text-base-content/40 hover:text-base-content transition-colors duration-300">
               View all
               <svg
                 xmlns="http://www.w3.org/2000/svg"

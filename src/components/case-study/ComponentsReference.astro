@@ -24,10 +24,10 @@ const propsRows = (rows: PropRow[]) => rows;
   <!-- Intro — shared between the page and the in-window versions so both
        open with the same framing. -->
   <header class="space-y-3">
-    <span class="text-[10px] uppercase tracking-[0.2em] text-[#FAFAFA]/60 font-mono">
+    <span class="text-[10px] uppercase tracking-[0.2em] text-base-content/60 font-mono">
       Internal · reference
     </span>
-    <h1 class="text-2xl font-bold tracking-tight text-[#FAFAFA]">
+    <h1 class="text-2xl font-bold tracking-tight text-base-content">
       Case study components
     </h1>
     <p class="text-sm text-body max-w-2xl leading-relaxed">
@@ -40,11 +40,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- Stage ------------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         Stage
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Section wrapper with a sticky label column. Use to break a case study
         into named beats (Discovery, Build, Outcome…). Children render in the
         right column.
@@ -55,15 +55,15 @@ const propsRows = (rows: PropRow[]) => rows;
           { name: "heading", type: "string", status: "optional" },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import Stage from "@components/case-study/Stage.astro";
       </code>
     </header>
@@ -83,11 +83,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- Callout ----------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         Callout
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Boxed note with a header and optional icon. Use for technical asides,
         architecture notes, or "why we chose X" interjections within prose.
       </p>
@@ -98,15 +98,15 @@ const propsRows = (rows: PropRow[]) => rows;
           { name: "accent", type: `"teal" | "amber"`, status: `default "teal"` },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import Callout from "@components/case-study/Callout.astro";
         <br />
         import {"{ Database }"} from "@lucide/astro";
@@ -129,17 +129,17 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- InlineNote -------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         InlineNote
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Quieter, italic aside with a neutral white left border. Use sparingly —
         for a single sentence of meta-commentary inside a stage. No
         configurable props beyond the slot (kept intentionally simple so
         accented sidebars stay distinct as the Quote component).
       </p>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import InlineNote from "@components/case-study/InlineNote.astro";
       </code>
     </header>
@@ -152,11 +152,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- Quote ------------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         Quote
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Pulled testimonial or framing line. Use sparingly to mark a beat that
         should land.
       </p>
@@ -167,15 +167,15 @@ const propsRows = (rows: PropRow[]) => rows;
           { name: "size", type: `"default" | "large"`, status: `default "default"` },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import Quote from "@components/case-study/Quote.astro";
       </code>
     </header>
@@ -194,11 +194,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- StateList --------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         StateList
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Titled list of short, bulleted points. Good for "what we considered",
         "constraints", or "what changed".
       </p>
@@ -210,15 +210,15 @@ const propsRows = (rows: PropRow[]) => rows;
           { name: "accent", type: `"teal" | "amber"`, status: `default "amber"` },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import StateList from "@components/case-study/StateList.astro";
       </code>
     </header>
@@ -248,11 +248,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- MetricsBar -------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         MetricsBar
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Inline strip of headline numbers. Lays out as 1/2/3/4 columns based on
         the length of <code class="font-mono">metrics</code> — the grid responds
         automatically.
@@ -266,15 +266,15 @@ const propsRows = (rows: PropRow[]) => rows;
           },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import MetricsBar from "@components/case-study/MetricsBar.astro";
       </code>
     </header>
@@ -290,11 +290,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- OutcomeGrid ------------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         OutcomeGrid
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Vertical list of outcomes (title + short paragraph) tagged with a
         short ID in a narrow left column. Pairs well after a MetricsBar —
         numbers above, narrative below.
@@ -314,15 +314,15 @@ const propsRows = (rows: PropRow[]) => rows;
           },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import OutcomeGrid from "@components/case-study/OutcomeGrid.astro";
       </code>
     </header>
@@ -369,11 +369,11 @@ const propsRows = (rows: PropRow[]) => rows;
 
   <!-- BeforeAfterSlider ------------------------------------------------- -->
   <section class="space-y-6">
-    <header class="space-y-3 border-l-2 border-[#C792EA] pl-3">
-      <h3 class="font-mono uppercase tracking-widest text-xs text-[#C792EA]">
+    <header class="space-y-3 border-l-2 border-secondary pl-3">
+      <h3 class="font-mono uppercase tracking-widest text-xs text-secondary">
         BeforeAfterSlider
       </h3>
-      <p class="text-sm text-[#FAFAFA]/75 leading-relaxed">
+      <p class="text-sm text-base-content/75 leading-relaxed">
         Draggable comparison between two images (the classic "before / after"
         wipe). Use to show a redesigned interface, a cleaned-up data view, or
         any state change that reads visually. Source images can be passed as
@@ -391,15 +391,15 @@ const propsRows = (rows: PropRow[]) => rows;
           { name: "aspectRatio", type: "string (CSS)", status: `default "16 / 10"` },
         ]).map((p) => (
           <Fragment>
-            <dt class="text-[#FAFAFA]">{p.name}</dt>
-            <dd class="text-[#FAFAFA]/75">
+            <dt class="text-base-content">{p.name}</dt>
+            <dd class="text-base-content/75">
               {p.type}{" "}
-              <span class="text-[#FAFAFA]/45">— {p.status}</span>
+              <span class="text-base-content/45">— {p.status}</span>
             </dd>
           </Fragment>
         ))}
       </dl>
-      <code class="text-xs text-[#FAFAFA]/55 block font-mono pt-1">
+      <code class="text-xs text-base-content/55 block font-mono pt-1">
         import BeforeAfterSlider from "@components/case-study/BeforeAfterSlider.astro";
       </code>
     </header>

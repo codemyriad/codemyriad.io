@@ -1,4 +1,4 @@
-import defaultTheme from "tailwindcss/defaultTheme";
+import { codemyriad, fontFamily } from "./design/theme.mjs";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -8,10 +8,12 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["JetBrains Mono", ...defaultTheme.fontFamily.mono],
-      },
+      fontFamily,
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require("@tailwindcss/typography"), require("daisyui")],
+  daisyui: {
+    themes: [{ codemyriad }],
+    logs: false,
+  },
 };

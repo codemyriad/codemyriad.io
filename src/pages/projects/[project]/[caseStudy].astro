@@ -44,10 +44,10 @@ const clientName = parentProject?.data.client ?? parentProject?.data.title ?? pr
     <div class="space-y-12 max-w-screen-lg mx-auto">
       <CaseStudyContent entry={entry} showHeader={true} fullPage={true} />
 
-      <nav class="border-t border-white/10 pt-8">
+      <nav class="border-t border-base-300 pt-8">
         <a
           href={`/projects/${projectSlug}`}
-          class="text-sm text-[#7EC7FF] hover:text-[#7EC7FF]/80 inline-flex items-center gap-2"
+          class="text-sm text-primary hover:text-primary/80 inline-flex items-center gap-2"
         >
           ← Back to {clientName}
         </a>

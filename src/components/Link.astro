@@ -16,8 +16,9 @@ const { href, external, underline = true, class: className, ...rest } =
   href={href}
   target={external ? "_blank" : "_self"}
   class={cn(
-    "inline-block decoration-white/30 hover:decoration-white/50 text-current hover:text-[#FAFAFA] transition-colors duration-300 ease-in-out",
-    underline && "underline underline-offset-2",
+    "inline-block text-current hover:text-base-content transition-colors duration-300 ease-in-out",
+    "hover:underline hover:underline-offset-2 hover:decoration-base-content/30",
+    underline && "underline underline-offset-2 decoration-base-content/30",
     className
   )}
   {...rest}
